@@ -1,0 +1,1453 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0c12">
+<title>Home Dashboard</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+<style>
+:root{
+  --accent:#7c5cff; --bg:#080a10; --card:rgba(255,255,255,.045); --card-h:rgba(255,255,255,.075);
+  --line:rgba(255,255,255,.08); --txt:#eef0f6; --mut:#8b90a3; --ok:#34d399; --warn:#fbbf24; --bad:#f87171;
+  --glow:var(--accent);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--txt);background:var(--bg);
+  background-image:
+    radial-gradient(900px 500px at 10% -10%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 60%),
+    radial-gradient(700px 500px at 100% 0%,rgba(56,189,248,.12),transparent 60%),
+    radial-gradient(800px 600px at 50% 120%,rgba(236,72,153,.10),transparent 60%);
+  background-attachment:fixed;
+}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+.wrap{max-width:1500px;margin:0 auto;padding:28px clamp(16px,3vw,40px) 90px}
+
+/* Header */
+header{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;justify-content:space-between;margin-bottom:22px}
+.hello small{display:block;color:var(--mut);font-size:14px;letter-spacing:.04em;text-transform:uppercase}
+.hello h1{margin:4px 0 0;font-size:clamp(26px,4vw,40px);font-weight:700;letter-spacing:-.02em}
+.hello h1 span{background:linear-gradient(90deg,var(--accent),#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.clock{font-variant-numeric:tabular-nums;font-size:clamp(34px,5vw,56px);font-weight:200;letter-spacing:-.02em;text-align:right;line-height:1}
+.clock small{display:block;font-size:14px;font-weight:400;color:var(--mut);margin-top:6px;letter-spacing:0}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:30px}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);backdrop-filter:blur(14px);font-size:13.5px;color:var(--mut)}
+.chip b{color:var(--txt);font-weight:600}
+.chip i{font-size:17px;color:var(--accent)}
+.sp{flex:1}
+.status{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--mut)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--mut);box-shadow:0 0 0 0 transparent}
+.online .dot{background:var(--ok);box-shadow:0 0 10px var(--ok)}
+.connecting .dot{background:var(--warn);animation:pulse 1s infinite}
+.error .dot{background:var(--bad)}
+@keyframes pulse{50%{opacity:.3}}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:13.5px;transition:.2s}
+.btn:hover{background:var(--card-h)}
+.btn.primary{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 55%,#38bdf8));border-color:transparent;font-weight:600}
+.btn.active{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 25%,transparent)}
+
+/* Sections & grid */
+section{margin-bottom:34px}
+section h2{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+section h2 i{font-size:18px;color:var(--accent)}
+section h2 em{font-style:normal;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:1px 9px;font-size:11px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:14px}
+.grid.cams{grid-template-columns:repeat(auto-fill,minmax(340px,1fr))}
+
+.tile{position:relative;padding:16px;border-radius:22px;background:var(--card);border:1px solid var(--line);backdrop-filter:blur(16px);
+  transition:transform .2s,background .25s,border-color .25s,box-shadow .3s;min-height:128px;display:flex;flex-direction:column;gap:10px;user-select:none;overflow:hidden}
+.tile:hover{background:var(--card-h);transform:translateY(-2px)}
+.tile.tg{cursor:pointer}
+.tile.on{border-color:color-mix(in srgb,var(--glow) 55%,transparent);
+  background:linear-gradient(160deg,color-mix(in srgb,var(--glow) 24%,transparent),var(--card) 70%);
+  box-shadow:0 8px 40px -12px color-mix(in srgb,var(--glow) 60%,transparent)}
+.tile.off{opacity:.55}
+.ico{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:23px;background:rgba(255,255,255,.06);color:var(--mut);transition:.25s;flex:none}
+.on .ico{background:var(--glow);color:#0b0d14;box-shadow:0 0 22px -2px var(--glow)}
+.row{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.nm{font-size:14px;font-weight:600;line-height:1.25;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.st{font-size:12.5px;color:var(--mut);margin-top:3px}
+.on .st{color:color-mix(in srgb,var(--txt) 75%,var(--glow))}
+.val{font-size:30px;font-weight:300;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-top:auto}
+.val small{font-size:14px;color:var(--mut);margin-left:3px}
+.tile.sens .ico{color:var(--accent)}
+.tile.alert{border-color:color-mix(in srgb,var(--warn) 60%,transparent)}
+.tile.alert .ico{background:var(--warn);color:#111}
+
+.sw{width:44px;height:26px;border-radius:99px;background:rgba(255,255,255,.12);position:relative;flex:none;transition:.25s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.25s}
+.on .sw{background:var(--glow)}
+.on .sw::after{left:21px}
+
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:99px;background:rgba(255,255,255,.12);outline:none;margin:4px 0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.5);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border:0;border-radius:50%;background:#fff}
+
+.ctl{display:flex;gap:8px;align-items:center}
+.rb{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.07);display:grid;place-items:center;font-size:20px;transition:.15s}
+.rb:hover{background:rgba(255,255,255,.14)}
+.rb:active{transform:scale(.92)}
+.rb.big{flex:1;width:auto;gap:8px;font-size:14px;font-weight:600;display:flex;justify-content:center}
+.ctl .t{flex:1;text-align:center;font-size:26px;font-weight:300;font-variant-numeric:tabular-nums}
+
+.cam{padding:0;min-height:0}
+.cam .view{position:relative;aspect-ratio:16/9;background:#000 center/cover;overflow:hidden}
+.cam img{width:100%;height:100%;object-fit:cover;display:block}
+.cam .ov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.55),transparent 28%,transparent 65%,rgba(0,0,0,.65));pointer-events:none}
+.cam .top,.cam .bot{position:absolute;left:14px;right:14px;display:flex;justify-content:space-between;align-items:center;font-size:13px}
+.cam .top{top:12px}.cam .bot{bottom:12px}
+.rec{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.1em;background:rgba(0,0,0,.45);padding:4px 9px;border-radius:99px;backdrop-filter:blur(8px)}
+.rec::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--bad);animation:pulse 1.4s infinite}
+.rec.live::before{background:var(--ok)}
+.cam .acts{display:flex;gap:8px}
+.cam .acts .rb{width:34px;height:34px;font-size:18px;background:rgba(0,0,0,.5);backdrop-filter:blur(8px)}
+
+.mp .meta{margin-top:auto}
+.empty{padding:50px 20px;border:1.5px dashed var(--line);border-radius:24px;text-align:center;color:var(--mut)}
+.empty h3{color:var(--txt);margin:0 0 8px;font-size:20px}
+.empty .btn{margin:6px 4px}
+
+/* Edit mode */
+.ed{display:none;position:absolute;top:8px;right:8px;gap:6px;z-index:3}
+body.edit .ed{display:flex}
+.ed button{width:28px;height:28px;border-radius:9px;background:rgba(0,0,0,.65);display:grid;place-items:center;font-size:15px;backdrop-filter:blur(6px)}
+.ed button:hover{background:var(--bad)}
+.ed button.rn:hover{background:var(--accent)}
+body.edit .tile{animation:wob .35s ease-in-out infinite alternate;cursor:grab}
+@keyframes wob{from{transform:rotate(-.35deg)}to{transform:rotate(.35deg)}}
+.tile.dragover{outline:2px dashed var(--accent);outline-offset:3px}
+
+/* Modal */
+.modal{position:fixed;inset:0;background:rgba(3,4,8,.7);backdrop-filter:blur(8px);display:none;place-items:center;z-index:50;padding:16px}
+.modal.open{display:grid}
+.box{width:min(640px,100%);max-height:88vh;overflow:auto;background:#10131c;border:1px solid var(--line);border-radius:26px;padding:24px;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+.box h3{margin:0 0 4px;font-size:20px}.box p{margin:0 0 18px;color:var(--mut);font-size:13.5px;line-height:1.5}
+.box label{display:block;font-size:12px;color:var(--mut);margin:14px 0 6px;letter-spacing:.06em;text-transform:uppercase}
+.box input[type=text],.box input[type=password],.box input[type=search]{width:100%;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--line);outline:none}
+.box input:focus{border-color:var(--accent)}
+.acts2{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.sw-acc{display:flex;gap:10px}
+.sw-acc button{width:30px;height:30px;border-radius:50%;border:2px solid transparent}
+.sw-acc button.sel{border-color:#fff}
+.list{margin-top:12px;max-height:46vh;overflow:auto;display:grid;gap:6px}
+.it{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid transparent;cursor:pointer;text-align:left;width:100%}
+.it:hover{background:rgba(255,255,255,.07)}
+.it.sel{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.it i{font-size:20px;color:var(--accent)}
+.it .n{font-size:14px}.it .e{font-size:11.5px;color:var(--mut)}
+.it .ck{margin-left:auto;color:var(--accent);font-size:20px}
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.filters button{padding:5px 11px;border-radius:99px;font-size:12px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.filters button.sel{background:var(--accent);border-color:transparent}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#1b1f2c;border:1px solid var(--line);padding:11px 18px;border-radius:14px;font-size:13.5px;z-index:99;opacity:0;pointer-events:none;transition:.3s}
+.toast.show{opacity:1}
+/* Navigation & Seiten */
+nav{display:flex;gap:6px;margin:0 0 22px;padding:5px;border-radius:16px;background:var(--card);border:1px solid var(--line);width:max-content;max-width:100%;overflow:auto;backdrop-filter:blur(14px)}
+nav button{padding:9px 16px;border-radius:12px;font-size:14px;color:var(--mut);display:flex;gap:8px;align-items:center;white-space:nowrap;transition:.2s}
+nav button:hover{color:var(--txt)}
+nav button.on{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 55%,#38bdf8));color:#fff;font-weight:600}
+nav button.alarm-on i{color:var(--bad)}
+.page{display:none}.page.show{display:block}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+.seg{display:inline-flex;padding:4px;border-radius:13px;background:var(--card);border:1px solid var(--line)}
+.seg button{padding:7px 12px;border-radius:10px;font-size:13px;color:var(--mut);display:flex;gap:6px;align-items:center}
+.seg button.on{background:rgba(255,255,255,.12);color:var(--txt)}
+.card{padding:20px;border-radius:24px;background:var(--card);border:1px solid var(--line);backdrop-filter:blur(16px)}
+.card h4{margin:0 0 12px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);font-weight:600}
+.edtool{display:none}body.edit .edtool{display:inline-flex}
+
+/* Multiview */
+.mv{display:grid;gap:12px}
+.mv .cell{position:relative;border-radius:20px;overflow:hidden;background:#05060a;border:1px solid var(--line);aspect-ratio:16/9;cursor:pointer;transition:.2s}
+.mv .cell:hover{border-color:var(--accent)}
+.mv .cell img{width:100%;height:100%;object-fit:cover;display:block}
+.mv .ov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.5),transparent 25%,transparent 65%,rgba(0,0,0,.7));pointer-events:none}
+.mv .lbl{position:absolute;left:12px;right:12px;bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px}
+.mv select{max-width:45%;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:4px 6px;font-size:12px;backdrop-filter:blur(8px)}
+.mv select option{background:#10131c}
+.mv .nocam{position:absolute;inset:0;display:grid;place-items:center;font-size:44px;color:var(--mut);opacity:.4}
+.mv .cell .rec{position:absolute;top:10px;left:10px}
+.mv .cell .lv{position:absolute;top:8px;right:8px;width:30px;height:30px;font-size:16px;background:rgba(0,0,0,.5)}
+.mv.l1p5 .cell:first-child{grid-column:span 2;grid-row:span 2}
+.bigview{aspect-ratio:16/9;background:#000;border-radius:16px;overflow:hidden}
+.bigview img{width:100%;height:100%;object-fit:contain}
+
+/* Energie */
+.egrid{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px}
+.estack{display:grid;gap:16px;align-content:start}
+.k2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.flow{width:100%;height:auto;display:block}
+.fl{fill:none;stroke:rgba(255,255,255,.09);stroke-width:4;stroke-linecap:round}
+.fa{fill:none;stroke-linecap:round;stroke-dasharray:2 14;animation:dash 1.5s linear infinite}
+.fa.rev{animation-direction:reverse}.fa.idle{opacity:0;animation:none}
+@keyframes dash{to{stroke-dashoffset:-32}}
+.ndw{width:220px;height:220px;display:grid;place-items:center;overflow:visible}
+.nd{position:relative;width:140px;height:140px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  background:radial-gradient(circle at 30% 25%,color-mix(in srgb,var(--c) 34%,#10131c),#0b0e15 75%);border:2px solid color-mix(in srgb,var(--c) 75%,transparent);
+  box-shadow:0 0 var(--gs,24px) 2px color-mix(in srgb,var(--c) 55%,transparent),inset 0 0 26px -6px var(--c);transition:box-shadow .8s}
+.nd::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--c);opacity:0;animation:ndring 3s ease-out infinite;pointer-events:none}
+.nd.idle::after{animation:none}.nd.idle{box-shadow:0 0 10px 0 color-mix(in srgb,var(--c) 25%,transparent);opacity:.7}
+@keyframes ndring{0%{transform:scale(1);opacity:.55}100%{transform:scale(1.4);opacity:0}}
+.nd.spin i{animation:spin 16s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.nd i{filter:drop-shadow(0 0 8px var(--c))}
+.flowcard{overflow:visible}
+#e-bats .ring{width:96px;height:96px}#e-bats .ring .c b{font-size:21px}#e-bats .cap{font-size:11.5px}
+.ring svg,.ring{overflow:visible}.ring .fg{filter:drop-shadow(0 0 6px rgba(255,255,255,.3))}
+.nd i{font-size:30px;color:var(--c)}.nd b{font-size:21px;font-weight:600;font-variant-numeric:tabular-nums}.nd small{font-size:12px;color:var(--mut)}
+.elab{fill:var(--txt);font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.bigv{font-size:34px;font-weight:300;letter-spacing:-.02em}
+.ring{position:relative;width:128px;height:128px;margin:0 auto}
+.ring svg{transform:rotate(-90deg);width:100%;height:100%}
+.ring .bg{fill:none;stroke:rgba(255,255,255,.08);stroke-width:11}
+.ring .fg{fill:none;stroke-width:11;stroke-linecap:round;transition:stroke-dasharray .8s,stroke .8s}
+.ring .c{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring .c b{font-size:28px;font-weight:300}.ring .c small{color:var(--mut);font-size:11px}
+.cap{text-align:center;color:var(--mut);font-size:12.5px;margin-top:8px}
+.chart text{fill:var(--mut);font-size:11px}
+.leg{display:flex;gap:16px;font-size:12.5px;color:var(--mut)}.leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+
+/* Räume */
+.planwrap{overflow:hidden;border-radius:26px;perspective:1800px;padding:6px}
+.plan{position:relative;width:100%;aspect-ratio:5/3;border-radius:22px;background:rgba(255,255,255,.025) center/contain no-repeat;border:1px solid var(--line);
+  transform-style:preserve-3d;transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+.plan.d3{transform:rotateX(56deg) rotateZ(-34deg) scale(.7)}
+.room{position:absolute;transform-style:preserve-3d;cursor:pointer}
+.room .wl{position:absolute;inset:0;border:2px solid color-mix(in srgb,var(--c) 70%,#fff);border-radius:6px;display:none;background:color-mix(in srgb,var(--c) 16%,transparent);transform:translateZ(var(--z))}
+.d3 .room .wl{display:block}
+.room .rc{position:absolute;inset:3px;border-radius:8px;border:2px solid color-mix(in srgb,var(--c) 75%,#fff);
+  background:linear-gradient(160deg,color-mix(in srgb,var(--c) 38%,rgba(10,12,18,.82)),color-mix(in srgb,var(--c) 12%,rgba(10,12,18,.88)));
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;padding:4px;overflow:hidden;text-align:center;transition:transform .9s,box-shadow .5s}
+.plan.img .room .rc{background:color-mix(in srgb,var(--c) 30%,transparent);backdrop-filter:blur(2px)}
+.d3 .room .rc{transform:translateZ(36px)}
+.room:hover .rc{border-color:#fff}
+.room.heat .rc{box-shadow:inset 0 0 26px 2px rgba(251,146,60,.55)}
+.room .rn{font-size:clamp(10px,1.1vw,13px);color:color-mix(in srgb,var(--txt) 80%,var(--c));font-weight:600}
+.room .rt{font-size:clamp(17px,2.6vw,32px);font-weight:300;letter-spacing:-.02em;line-height:1}
+.room .rh{font-size:clamp(9px,.95vw,12px);color:var(--mut);display:flex;gap:8px;align-items:center}
+.rtools{display:none;position:absolute;top:6px;right:6px;gap:4px;z-index:5}
+body.edit .rtools{display:flex}.d3 .rtools,.d3 .rsz{display:none!important}
+.rtools button{width:24px;height:24px;border-radius:7px;background:rgba(0,0,0,.65);display:grid;place-items:center;font-size:13px}
+.rsz{display:none;position:absolute;right:2px;bottom:2px;width:20px;height:20px;cursor:nwse-resize;z-index:5;border-right:3px solid #fff;border-bottom:3px solid #fff;border-radius:0 0 8px 0}
+body.edit .rsz{display:block}
+body.edit .room{cursor:move}
+.legbar{height:8px;border-radius:9px;background:linear-gradient(90deg,hsl(210 80% 55%),hsl(110 80% 55%),hsl(10 80% 55%));max-width:300px}
+.legend{display:flex;justify-content:space-between;max-width:300px;font-size:11.5px;color:var(--mut);margin-top:4px}
+
+/* Alarm */
+.agrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:16px}
+.ahero{text-align:center;padding:28px 20px}
+.shield{width:132px;height:132px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;font-size:62px;background:rgba(255,255,255,.05);border:2px solid var(--line);color:var(--mut);transition:.4s}
+.a-disarmed .shield{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 55%,transparent);box-shadow:0 0 50px -8px var(--ok)}
+.a-armed .shield{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 60%,transparent);box-shadow:0 0 50px -8px var(--accent)}
+.a-pending .shield{color:var(--warn);border-color:var(--warn);animation:pulse 1s infinite}
+.a-triggered .shield{color:#fff;background:var(--bad);border-color:var(--bad);box-shadow:0 0 70px 0 var(--bad);animation:pulse .6s infinite}
+.astate{font-size:26px;font-weight:600;margin-bottom:4px}
+.amodes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}
+.amodes button{padding:14px 6px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid var(--line);font-size:13px;display:flex;flex-direction:column;gap:6px;align-items:center;transition:.2s}
+.amodes button i{font-size:24px;color:var(--accent)}
+.amodes button:hover{background:rgba(255,255,255,.12)}
+.amodes button.dis i{color:var(--ok)}
+.amodes button.cur{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,transparent)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:260px;margin:14px auto 0}
+.pad button{height:48px;border-radius:14px;background:rgba(255,255,255,.07);font-size:19px}
+.pad button:hover{background:rgba(255,255,255,.14)}
+.pcode{letter-spacing:.6em;font-size:24px;text-align:center;height:34px;color:var(--accent)}
+.zones{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.zn{display:flex;gap:10px;align-items:center;padding:11px 13px;border-radius:15px;background:rgba(255,255,255,.04);border:1px solid var(--line);font-size:13.5px}
+.zn i{font-size:21px;color:var(--ok)}.zn small{display:block;color:var(--mut);font-size:11.5px}
+.zn.open{border-color:color-mix(in srgb,var(--warn) 60%,transparent)}.zn.open i{color:var(--warn)}
+.zn.alert{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 14%,transparent)}.zn.alert i{color:var(--bad)}
+.logl{display:grid;gap:2px;max-height:300px;overflow:auto}
+.logl div{display:flex;gap:12px;padding:8px 4px;border-bottom:1px solid var(--line);font-size:13px}
+.logl time{color:var(--mut);font-variant-numeric:tabular-nums;min-width:62px}
+@media(max-width:900px){.egrid,.agrid{grid-template-columns:1fr}}
+@media(max-width:560px){.grid{grid-template-columns:repeat(2,1fr);gap:10px}.grid.cams{grid-template-columns:1fr}.clock{text-align:left}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="hello"><small id="date"></small><h1><span id="greet">Hallo</span></h1></div>
+    <div class="clock"><span id="clock">--:--</span></div>
+  </header>
+
+  <nav id="nav"></nav>
+
+  <div class="bar">
+    <div id="chips" style="display:contents"></div>
+    <div class="sp"></div>
+    <div class="status" id="status"><span class="dot"></span><span id="stxt">Nicht verbunden</span></div>
+    <button class="btn" id="bAdd" onclick="openPicker()" style="display:none"><i class="mdi mdi-plus"></i> Kachel</button>
+    <button class="btn" id="bEdit" onclick="toggleEdit()"><i class="mdi mdi-pencil-outline"></i> Bearbeiten</button>
+    <button class="btn" onclick="openSettings()"><i class="mdi mdi-cog-outline"></i></button>
+  </div>
+
+  <div class="page" id="pg-home"><main id="main"></main></div>
+  <div class="page" id="pg-cams"></div>
+  <div class="page" id="pg-energy"></div>
+  <div class="page" id="pg-rooms"></div>
+  <div class="page" id="pg-alarm"></div>
+</div>
+<datalist id="dlEnt"></datalist>
+<input type="file" id="planFile" accept="image/*" style="display:none">
+
+<!-- Kamera-Fokus -->
+<div class="modal" id="mCam" onclick="if(event.target===this)closeModals()"><div class="box" style="width:min(1100px,100%)" id="mCamBody"></div></div>
+<!-- Raum ansehen -->
+<div class="modal" id="mRoomView" onclick="if(event.target===this)closeModals()"><div class="box" id="mRoomBody"></div></div>
+<!-- Raum bearbeiten -->
+<div class="modal" id="mRoomEdit" onclick="if(event.target===this)closeModals()"><div class="box" id="mRoomEditBody"></div></div>
+<!-- Energie zuordnen -->
+<div class="modal" id="mEnergy" onclick="if(event.target===this)closeModals()"><div class="box" id="mEnergyBody"></div></div>
+<!-- Alarm zuordnen -->
+<div class="modal" id="mAlarmCfg" onclick="if(event.target===this)closeModals()"><div class="box" id="mAlarmCfgBody"></div></div>
+
+<!-- Einstellungen -->
+<div class="modal" id="mSet" onclick="if(event.target===this)closeModals()">
+  <div class="box">
+    <h3>Verbindung</h3>
+    <p>Trage deine Home-Assistant-Adresse und einen <b>Langlebigen Zugriffstoken</b> ein (HA → Profil → Sicherheit → ganz unten). Der Token bleibt nur in deinem Browser.</p>
+    <label>Home Assistant URL</label>
+    <input type="text" id="iUrl" placeholder="http://homeassistant.local:8123  (leer = gleiche Adresse wie diese Seite)">
+    <label>Zugriffstoken</label>
+    <input type="password" id="iTok" placeholder="eyJhbGciOi…">
+    <label>Akzentfarbe</label>
+    <div class="sw-acc" id="accs"></div>
+    <label>Wandmodus (Raspberry Pi + Monitor, ohne Bedienung)</label>
+    <div id="kcfg"></div>
+    <div class="acts2">
+      <button class="btn primary" onclick="saveConn()"><i class="mdi mdi-lan-connect"></i> Verbinden</button>
+      <button class="btn" onclick="startDemo()"><i class="mdi mdi-flask-outline"></i> Demo-Modus</button>
+      <button class="btn" onclick="exportCfg()"><i class="mdi mdi-export"></i> Layout exportieren</button>
+      <button class="btn" onclick="importCfg()"><i class="mdi mdi-import"></i> Importieren</button>
+      <button class="btn" onclick="closeModals()">Schließen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Picker -->
+<div class="modal" id="mPick" onclick="if(event.target===this)closeModals()">
+  <div class="box">
+    <h3>Kachel hinzufügen</h3>
+    <p>Klicke auf Entitäten, um sie ein- oder auszublenden.</p>
+    <input type="search" id="pSearch" placeholder="Suchen…" oninput="renderPicker()">
+    <div class="filters" id="pFilters"></div>
+    <div class="list" id="pList"></div>
+    <div class="acts2"><button class="btn primary" onclick="closeModals()">Fertig</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ Konfiguration ============ */
+const LS='ha-dash-v1';
+const DEF={url:'',token:'',demo:false,tiles:[],names:{},accent:'#7c5cff',camLayout:'auto',camSel:[],energy:{},rooms:[],plan:'',alarm:{}};
+let cfg;try{cfg={...DEF,...JSON.parse(localStorage.getItem(LS)||'{}')}}catch{cfg={...DEF}}
+const save=()=>localStorage.setItem(LS,JSON.stringify(cfg));
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const dom=id=>id.split('.')[0];
+const ACCENTS=['#7c5cff','#38bdf8','#34d399','#f59e0b','#f43f5e','#ec4899'];
+
+/* Sektionen: Reihenfolge & Zuordnung */
+const SECTIONS=[
+ {id:'cam',t:'Kameras',i:'cctv',d:['camera'],grid:'cams'},
+ {id:'ctl',t:'Licht & Schalter',i:'lightbulb-group-outline',d:['light','switch','input_boolean','fan','cover','lock']},
+ {id:'clm',t:'Klima',i:'thermostat',d:['climate']},
+ {id:'med',t:'Medien',i:'speaker-wireless',d:['media_player']},
+ {id:'sen',t:'Sensoren',i:'chart-line',d:['sensor','binary_sensor','person','weather']},
+ {id:'aut',t:'Automatisierungen',i:'robot-outline',d:['automation']},
+ {id:'scn',t:'Szenen & Skripte',i:'palette-swatch-outline',d:['scene','script','button']},
+];
+const SUPPORTED=SECTIONS.flatMap(s=>s.d);
+const secOf=id=>SECTIONS.find(s=>s.d.includes(dom(id)));
+
+/* ============ Icons ============ */
+const DOMICON={light:'lightbulb',switch:'toggle-switch-variant',input_boolean:'toggle-switch-outline',fan:'fan',cover:'blinds',lock:'lock',climate:'thermostat',
+ media_player:'speaker',sensor:'gauge',binary_sensor:'checkbox-blank-circle-outline',person:'account',weather:'weather-partly-cloudy',automation:'robot',scene:'palette',script:'script-text-play',button:'gesture-tap-button',camera:'cctv'};
+const DCICON={temperature:'thermometer',humidity:'water-percent',power:'flash',energy:'lightning-bolt',battery:'battery',illuminance:'brightness-5',pressure:'gauge',co2:'molecule-co2',
+ door:'door',window:'window-closed-variant',motion:'motion-sensor',occupancy:'motion-sensor',smoke:'smoke-detector',moisture:'water-alert',opening:'door-open',presence:'home-account',voltage:'sine-wave',current:'current-ac'};
+function icon(s){
+  const a=s.attributes||{};
+  if(a.icon&&a.icon.startsWith('mdi:'))return a.icon.slice(4);
+  return DCICON[a.device_class]||DOMICON[dom(s.entity_id)]||'help-circle-outline';
+}
+const mdi=n=>`<i class="mdi mdi-${n}"></i>`;
+
+/* ============ Zustand & Verbindung ============ */
+let states={},ws,msgId=1,pending={},retry,wantEdit=false,liveCams=new Set(),demoTimer;
+
+function setStatus(k,txt){const e=$('#status');e.className='status '+k;$('#stxt').textContent=txt}
+function send(o){return new Promise((res,rej)=>{const id=msgId++;pending[id]={res,rej};ws.send(JSON.stringify({id,...o}))})}
+function baseUrl(){let b=cfg.url.trim().replace(/\/$/,'');if(!b&&location.protocol.startsWith('http'))b=location.origin;return b}
+
+function connect(){
+  clearTimeout(retry);if(ws){ws.onclose=null;try{ws.close()}catch{}}
+  if(cfg.demo){startDemoEngine();return}
+  const base=baseUrl();
+  if(!base||!cfg.token){setStatus('error','Nicht eingerichtet');renderAll();return}
+  setStatus('connecting','Verbinde…');
+  try{ws=new WebSocket(base.replace(/^http/,'ws')+'/api/websocket')}catch(e){setStatus('error','Ungültige URL');return}
+  let ok=false;
+  ws.onmessage=e=>{
+    const m=JSON.parse(e.data);
+    if(m.type==='auth_required')ws.send(JSON.stringify({type:'auth',access_token:cfg.token}));
+    else if(m.type==='auth_ok'){ok=true;setStatus('online','Verbunden');
+      send({type:'get_states'}).then(r=>{states={};r.forEach(s=>states[s.entity_id]=s);renderAll()});
+      send({type:'subscribe_events',event_type:'state_changed'})}
+    else if(m.type==='auth_invalid'){setStatus('error','Token ungültig');ws.onclose=null}
+    else if(m.type==='result'){const p=pending[m.id];if(p){delete pending[m.id];m.success?p.res(m.result):p.rej(m.error)}}
+    else if(m.type==='event'){const d=m.event.data;d.new_state?states[d.entity_id]=d.new_state:delete states[d.entity_id];updateTile(d.entity_id)}
+  };
+  ws.onclose=()=>{setStatus('error','Getrennt – neuer Versuch…');retry=setTimeout(connect,ok?2000:6000)};
+  ws.onerror=()=>{};
+}
+function call(domain,service,entity_id,data={}){
+  if(cfg.demo)return demoCall(domain,service,entity_id,data);
+  if(!ws||ws.readyState!==1)return toast('Nicht verbunden');
+  send({type:'call_service',domain,service,target:{entity_id},service_data:data}).catch(e=>toast('Fehler: '+(e.message||'Dienst fehlgeschlagen')));
+}
+
+/* ============ Kachel-Rendering ============ */
+const num=v=>{const n=parseFloat(v);return isNaN(n)?null:n};
+const BIN={door:['Offen','Zu'],window:['Offen','Zu'],opening:['Offen','Zu'],motion:['Bewegung','Ruhig'],occupancy:['Belegt','Frei'],presence:['Anwesend','Abwesend'],smoke:['Rauch!','OK'],moisture:['Feucht!','Trocken'],lock:['Offen','Zu']};
+const ALERT_DC=['door','window','opening','smoke','moisture'];
+
+function tile(s){
+  const id=s.entity_id,d=dom(id),a=s.attributes||{},st=s.state;
+  const name=cfg.names[id]||a.friendly_name||id;
+  const unav=st==='unavailable'||st==='unknown';
+  let cls='',tg=false,inner='';
+  const head=(extra='')=>`<div class="row"><div class="ico">${mdi(icon(s))}</div>${extra}</div>`;
+  const label=(t)=>`<div><div class="nm">${esc(name)}</div><div class="st">${t}</div></div>`;
+
+  if(d==='camera'){return{cls:'cam',html:camHTML(s,name)}}
+
+  if(['light','switch','input_boolean','fan'].includes(d)){
+    tg=true;const on=st==='on';cls=on?'on':'';
+    if(d==='light'&&on&&a.rgb_color)tile.glow=`rgb(${a.rgb_color.join(',')})`;
+    const modes=a.supported_color_modes||[];
+    const dim=d==='light'&&on&&modes.some(m=>m!=='onoff');
+    const pct=a.brightness!=null?Math.round(a.brightness/2.55):0;
+    inner=head(`<div class="sw"></div>`)+label(unav?'Nicht verfügbar':on?(d==='light'&&a.brightness!=null?pct+' %':'An'):'Aus')+
+      (dim?`<input type="range" min="1" max="100" value="${pct}" data-act="bri" data-id="${id}" onclick="event.stopPropagation()">`:'');
+    return{cls:cls+(unav?' off':'')+' tg',html:inner,glow:d==='light'&&on&&a.rgb_color?`rgb(${a.rgb_color.join(',')})`:'',tg:true};
+  }
+  if(d==='automation'){
+    const on=st==='on';
+    return{cls:(on?'on':'off')+' tg',tg:true,html:head(`<div class="sw"></div>`)+label(on?'Aktiv':'Deaktiviert')+
+      `<button class="rb big" data-act="trig" style="height:32px">${mdi('play')} Ausführen</button>`};
+  }
+  if(d==='cover'){
+    const pos=a.current_position,open=st!=='closed';
+    return{cls:open?'on':'',html:head()+label(st==='opening'?'Öffnet…':st==='closing'?'Schließt…':pos!=null?pos+' % offen':(open?'Offen':'Geschlossen'))+
+      `<div class="ctl"><button class="rb" data-act="cup">${mdi('arrow-up')}</button><button class="rb" data-act="cstop">${mdi('stop')}</button><button class="rb" data-act="cdn">${mdi('arrow-down')}</button></div>`};
+  }
+  if(d==='lock'){const lk=st==='locked';return{cls:lk?'on':'',tg:true,glow:lk?'#34d399':'#fbbf24',html:head(`<div class="sw"></div>`)+label(lk?'Verriegelt':'Offen')}}
+  if(['scene','script','button'].includes(d)){
+    return{cls:'tg',tg:true,html:head(`<span class="rb" style="width:34px;height:34px">${mdi('play')}</span>`)+label(d==='scene'?'Szene aktivieren':d==='script'?'Skript starten':'Drücken')};
+  }
+  if(d==='climate'){
+    const t=a.temperature,cur=a.current_temperature,step=a.target_temp_step||0.5,act=a.hvac_action;
+    const on=st!=='off';
+    const HV={heat:'Heizen',cool:'Kühlen',idle:'Bereit',off:'Aus',heating:'Heizt',cooling:'Kühlt',auto:'Auto',heat_cool:'Auto',fan_only:'Lüften',dry:'Trocknen'};
+    return{cls:on?'on':'',glow:act==='cooling'||st==='cool'?'#38bdf8':'#fb923c',html:head(`<div class="st" style="margin:0">Ist ${cur!=null?cur+'°':'–'}</div>`)+label(HV[act]||HV[st]||st)+
+      `<div class="ctl"><button class="rb" data-act="tdn" data-step="${step}">${mdi('minus')}</button><div class="t">${t!=null?t.toFixed(1):'–'}°</div><button class="rb" data-act="tup" data-step="${step}">${mdi('plus')}</button></div>`};
+  }
+  if(d==='media_player'){
+    const pl=st==='playing',idle=['off','unavailable','standby'].includes(st);
+    const vol=a.volume_level!=null?Math.round(a.volume_level*100):null;
+    return{cls:'mp '+(pl?'on':idle?'off':''),html:head()+`<div class="meta"><div class="nm">${esc(a.media_title||name)}</div><div class="st">${esc(a.media_artist||(pl?'Spielt':idle?'Aus':'Pausiert'))}</div></div>`+
+      `<div class="ctl"><button class="rb" data-act="prev">${mdi('skip-previous')}</button><button class="rb big" data-act="pp">${mdi(pl?'pause':'play')}</button><button class="rb" data-act="next">${mdi('skip-next')}</button></div>`+
+      (vol!=null&&!idle?`<input type="range" min="0" max="100" value="${vol}" data-act="vol">`:'')};
+  }
+  if(d==='binary_sensor'){
+    const on=st==='on',dc=a.device_class,txt=(BIN[dc]||['An','Aus'])[on?0:1];
+    return{cls:'sens'+(on&&ALERT_DC.includes(dc)?' alert':on?' on':''),html:head()+`<div class="val" style="font-size:22px;margin-top:auto">${txt}</div><div class="nm">${esc(name)}</div>`};
+  }
+  if(d==='person'){const h=st==='home';return{cls:'sens'+(h?' on':''),glow:'#34d399',html:head()+`<div><div class="nm">${esc(name)}</div><div class="st">${h?'Zuhause':st==='not_home'?'Unterwegs':esc(st)}</div></div>`}}
+  if(d==='weather'){
+    const T={sunny:'Sonnig',cloudy:'Bewölkt',partlycloudy:'Teils bewölkt',rainy:'Regen',pouring:'Starkregen',snowy:'Schnee',fog:'Nebel',lightning:'Gewitter','clear-night':'Klar'};
+    return{cls:'sens',html:head()+`<div class="val">${a.temperature??'–'}<small>${a.temperature_unit||'°C'}</small></div><div class="st">${T[st]||st}</div>`};
+  }
+  // sensor
+  const n=num(st),u=a.unit_of_measurement||'';
+  return{cls:'sens',html:head()+`<div class="val">${n!==null?(Math.abs(n)>=100?Math.round(n):Math.round(n*10)/10):esc(st)}<small>${esc(u)}</small></div><div class="nm" style="margin-top:-4px">${esc(name)}</div>`};
+}
+
+function camHTML(s,name){
+  const live=liveCams.has(s.entity_id);
+  return `<div class="view"><img data-cam="${s.entity_id}" alt="">
+    <div class="ov"></div>
+    <div class="top"><span class="rec ${live?'live':''}">${live?'LIVE':'SNAPSHOT'}</span>
+      <div class="acts"><button class="rb" data-act="live" title="Live-Stream umschalten">${mdi(live?'pause':'play')}</button><button class="rb" data-act="full" title="Vollbild">${mdi('fullscreen')}</button></div></div>
+    <div class="bot"><b>${esc(name)}</b><span style="opacity:.7">${s.state==='unavailable'?'offline':''}</span></div></div>`;
+}
+function camSrc(id,liveMode){
+  const s=states[id];if(!s)return '';
+  let p=s.attributes.entity_picture||`/api/camera_proxy/${id}`;
+  if(p.startsWith('data:'))return p;
+  if(liveMode)p=p.replace('/camera_proxy/','/camera_proxy_stream/');
+  return baseUrl()+p+(liveMode?'':(p.includes('?')?'&':'?')+'_t='+Date.now());
+}
+function refreshCam(img){
+  const id=img.dataset.cam;
+  if(liveCams.has(id)){const u=camSrc(id,true);if(img.dataset.live!==u.split('?')[0]){img.dataset.live=u.split('?')[0];img.src=u}return}
+  img.dataset.live='';
+  if(cfg.demo){img.src=demoCam(id);return}
+  const n=new Image();n.onload=()=>{img.src=n.src};n.src=camSrc(id,false);
+}
+setInterval(()=>document.querySelectorAll('img[data-cam]').forEach(refreshCam),3000);
+
+/* ============ Render ============ */
+function tileEl(id){
+  const s=states[id];
+  const el=document.createElement('div');
+  el.dataset.id=id;el.draggable=true;
+  fillTile(el,s,id);return el;
+}
+function fillTile(el,s,id){
+  if(!s){el.className='tile off';el.innerHTML=`<div class="ico">${mdi('help-circle-outline')}</div><div class="nm">${esc(id)}</div><div class="st">Entität nicht gefunden</div>${edBtns(id)}`;return}
+  const t=tile(s);
+  el.className='tile '+t.cls;
+  el.style.setProperty('--glow',t.glow||'var(--accent)');
+  el.innerHTML=t.html+edBtns(id);
+  el.querySelectorAll('img[data-cam]').forEach(refreshCam);
+}
+const edBtns=id=>`<div class="ed"><button class="rn" data-act="ren" title="Umbenennen">${mdi('pencil')}</button><button data-act="del" title="Entfernen">${mdi('close')}</button></div>`;
+
+function renderAll(){
+  queueMicrotask(renderPage);
+  const m=$('#main');m.innerHTML='';
+  if(!cfg.tiles.length){
+    m.innerHTML=`<div class="empty"><h3>${mdi('view-dashboard-outline')} Dein Dashboard ist noch leer</h3>
+      <p>${Object.keys(states).length?'Füge Kacheln hinzu oder lass dir einen Vorschlag generieren.':'Verbinde dich mit Home Assistant oder starte den Demo-Modus.'}</p>
+      ${Object.keys(states).length?`<button class="btn primary" onclick="autoFill()">${mdi('auto-fix')} Automatisch füllen</button><button class="btn" onclick="openPicker()">${mdi('plus')} Kachel wählen</button>`:`<button class="btn primary" onclick="openSettings()">${mdi('lan-connect')} Verbindung einrichten</button><button class="btn" onclick="startDemo()">${mdi('flask-outline')} Demo ansehen</button>`}</div>`;
+    summary();return;
+  }
+  for(const sec of SECTIONS){
+    const ids=cfg.tiles.filter(i=>sec.d.includes(dom(i)));
+    if(!ids.length)continue;
+    const se=document.createElement('section');
+    se.innerHTML=`<h2>${mdi(sec.i)} ${sec.t} <em>${ids.length}</em></h2><div class="grid ${sec.grid||''}"></div>`;
+    const g=se.querySelector('.grid');ids.forEach(i=>g.appendChild(tileEl(i)));m.appendChild(se);
+  }
+  summary();
+}
+function updateTile(id){
+  summary();schedPage();
+  if(dom(id)==='alarm_control_panel'||dom(id)==='binary_sensor')logAlarm(id);
+  const el=document.querySelector(`.tile[data-id="${CSS.escape(id)}"]`);if(!el)return;
+  const ae=document.activeElement;
+  if(ae&&el.contains(ae)&&ae.type==='range')return;
+  if(dom(id)==='camera'){const s=states[id];el.querySelector('.bot span').textContent=s&&s.state==='unavailable'?'offline':'';return}
+  fillTile(el,states[id],id);
+}
+
+function summary(){
+  const all=Object.values(states),cnt=(d,st='on')=>all.filter(s=>dom(s.entity_id)===d&&s.state===st).length;
+  const open=all.filter(s=>dom(s.entity_id)==='binary_sensor'&&s.state==='on'&&ALERT_DC.includes(s.attributes.device_class)&&s.attributes.device_class!=='smoke'&&s.attributes.device_class!=='moisture').length;
+  const items=[['lightbulb',cnt('light'),'Lichter an'],['home-account',cnt('person','home'),'zuhause'],['door-open',open,'offen'],['robot',cnt('automation'),'Automationen aktiv']];
+  $('#chips').innerHTML=Object.keys(states).length?items.map(([i,n,t])=>`<span class="chip">${mdi(i)}<b>${n}</b> ${t}</span>`).join(''):'';
+}
+
+/* ============ Interaktion ============ */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');const t=e.target.closest('.tile');
+  if(!t)return;
+  const id=t.dataset.id,s=states[id],d=dom(id);
+  if(b&&b.tagName!=='INPUT'){
+    e.stopPropagation();const act=b.dataset.act;
+    if(act==='del'){cfg.tiles=cfg.tiles.filter(x=>x!==id);save();renderAll();return}
+    if(act==='ren'){const n=prompt('Anzeigename (leer = Original):',cfg.names[id]||s?.attributes.friendly_name||id);if(n!==null){n.trim()?cfg.names[id]=n.trim():delete cfg.names[id];save();fillTile(t,s,id)}return}
+    if(document.body.classList.contains('edit'))return;
+    const a=s?.attributes||{};
+    switch(act){
+      case'trig':call('automation','trigger',id);break;
+      case'cup':call('cover','open_cover',id);break;case'cdn':call('cover','close_cover',id);break;case'cstop':call('cover','stop_cover',id);break;
+      case'tup':case'tdn':{const st=parseFloat(b.dataset.step)||.5;call('climate','set_temperature',id,{temperature:+((a.temperature||20)+(act==='tup'?st:-st)).toFixed(1)});break}
+      case'pp':call('media_player','media_play_pause',id);break;case'next':call('media_player','media_next_track',id);break;case'prev':call('media_player','media_previous_track',id);break;
+      case'live':{liveCams.has(id)?liveCams.delete(id):liveCams.add(id);const img=t.querySelector('img');img.dataset.live='';fillTile(t,s,id);break}
+      case'full':{const v=t.querySelector('.view');(v.requestFullscreen||v.webkitRequestFullscreen).call(v);break}
+    }
+    return;
+  }
+  if(document.body.classList.contains('edit')||e.target.matches('input'))return;
+  if(!t.classList.contains('tg'))return;
+  if(['scene','script','button'].includes(d))call(d,d==='button'?'press':'turn_on',id);
+  else if(d==='lock')call('lock',s.state==='locked'?'unlock':'lock',id);
+  else call(d==='automation'?'automation':'homeassistant','toggle',id);
+});
+document.addEventListener('change',e=>{
+  const i=e.target;if(i.type!=='range')return;
+  const id=i.closest('.tile').dataset.id;
+  if(i.dataset.act==='bri')call('light','turn_on',id,{brightness_pct:+i.value});
+  if(i.dataset.act==='vol')call('media_player','volume_set',id,{volume_level:i.value/100});
+});
+
+/* Drag & Drop Sortierung */
+let dragId=null;
+document.addEventListener('dragstart',e=>{const t=e.target.closest?.('.tile');if(!t||!document.body.classList.contains('edit')){e.preventDefault();return}dragId=t.dataset.id});
+document.addEventListener('dragover',e=>{const t=e.target.closest?.('.tile');if(t&&dragId){e.preventDefault();document.querySelectorAll('.dragover').forEach(x=>x.classList.remove('dragover'));t.classList.add('dragover')}});
+document.addEventListener('drop',e=>{
+  const t=e.target.closest?.('.tile');if(!t||!dragId||t.dataset.id===dragId)return;e.preventDefault();
+  const a=cfg.tiles.filter(x=>x!==dragId);a.splice(a.indexOf(t.dataset.id),0,dragId);cfg.tiles=a;save();dragId=null;renderAll();
+});
+document.addEventListener('dragend',()=>{dragId=null;document.querySelectorAll('.dragover').forEach(x=>x.classList.remove('dragover'))});
+
+function toggleEdit(){
+  const on=document.body.classList.toggle('edit');
+  $('#bEdit').classList.toggle('active',on);$('#bEdit').innerHTML=on?`${mdi('check')} Fertig`:`${mdi('pencil-outline')} Bearbeiten`;
+  showPage(page);
+}
+
+/* ============ Picker ============ */
+let pFilter='all';
+function openPicker(){pFilter='all';$('#pSearch').value='';renderPicker();$('#mPick').classList.add('open')}
+function renderPicker(){
+  $('#pFilters').innerHTML=[{id:'all',t:'Alle'},...SECTIONS.map(s=>({id:s.id,t:s.t}))].map(f=>`<button class="${pFilter===f.id?'sel':''}" onclick="pFilter='${f.id}';renderPicker()">${f.t}</button>`).join('');
+  const q=$('#pSearch').value.toLowerCase();
+  const list=Object.values(states).filter(s=>SUPPORTED.includes(dom(s.entity_id))).filter(s=>pFilter==='all'||secOf(s.entity_id).id===pFilter)
+    .filter(s=>!q||(s.attributes.friendly_name||'').toLowerCase().includes(q)||s.entity_id.includes(q))
+    .sort((a,b)=>a.entity_id.localeCompare(b.entity_id)).slice(0,300);
+  $('#pList').innerHTML=list.map(s=>`<button class="it ${cfg.tiles.includes(s.entity_id)?'sel':''}" onclick="pickToggle('${s.entity_id}')">${mdi(icon(s))}<div><div class="n">${esc(s.attributes.friendly_name||s.entity_id)}</div><div class="e">${s.entity_id}</div></div>${cfg.tiles.includes(s.entity_id)?`<span class="ck">${mdi('check-circle')}</span>`:''}</button>`).join('')||'<p>Keine Treffer.</p>';
+}
+function pickToggle(id){cfg.tiles.includes(id)?cfg.tiles=cfg.tiles.filter(x=>x!==id):cfg.tiles.push(id);save();renderPicker();renderAll()}
+function autoFill(){
+  const lim={camera:6,light:12,switch:6,climate:4,media_player:3,automation:8,scene:8,script:4,person:4,cover:4};
+  const c={};const add=[];
+  Object.values(states).forEach(s=>{const d=dom(s.entity_id);if(lim[d]&&(c[d]=(c[d]||0)+1)<=lim[d])add.push(s.entity_id)});
+  Object.values(states).filter(s=>dom(s.entity_id)==='sensor'&&['temperature','humidity','power','energy'].includes(s.attributes.device_class)).slice(0,8).forEach(s=>add.push(s.entity_id));
+  cfg.tiles=[...new Set([...cfg.tiles,...add])];save();renderAll();toast('Vorschlag erstellt – mit „Bearbeiten" anpassen');
+}
+
+/* ============ Einstellungen ============ */
+function openSettings(){
+  $('#iUrl').value=cfg.url;$('#iTok').value=cfg.token;
+  $('#accs').innerHTML=ACCENTS.map(c=>`<button style="background:${c}" class="${c===cfg.accent?'sel':''}" onclick="setAccent('${c}')"></button>`).join('');
+  renderKcfg();$('#mSet').classList.add('open');
+}
+function closeModals(){document.querySelectorAll('.modal').forEach(m=>m.classList.remove('open'));$('#mCamBody').innerHTML=''}
+function setAccent(c){cfg.accent=c;save();document.documentElement.style.setProperty('--accent',c);openSettings()}
+function saveConn(){cfg.url=$('#iUrl').value.trim();cfg.token=$('#iTok').value.trim();cfg.demo=false;states={};save();closeModals();clearInterval(demoTimer);connect()}
+function startDemo(){cfg.demo=true;if(!cfg.tiles.length||cfg.tiles.some(t=>!DEMO[t]))cfg.tiles=Object.keys(DEMO).filter(k=>!/^sensor\.(e_|t_|h_)|^sensor\.m340i|^alarm_control|^binary_sensor\.z_/.test(k));save();closeModals();clearInterval(demoTimer);connect()}
+function exportCfg(){const j=JSON.stringify({tiles:cfg.tiles,names:cfg.names,accent:cfg.accent});navigator.clipboard?.writeText(j);prompt('Layout (auch in die Zwischenablage kopiert):',j)}
+function importCfg(){const j=prompt('Layout-JSON einfügen:');if(!j)return;try{const o=JSON.parse(j);Object.assign(cfg,{tiles:o.tiles||[],names:o.names||{},accent:o.accent||cfg.accent});save();document.documentElement.style.setProperty('--accent',cfg.accent);renderAll();toast('Layout importiert')}catch{toast('Ungültiges JSON')}}
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),2800)}
+
+/* ============ Uhr ============ */
+function tick(){
+  const n=new Date(),h=n.getHours();
+  $('#clock').textContent=n.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'});
+  $('#date').textContent=n.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
+  $('#greet').textContent=h<5?'Gute Nacht':h<11?'Guten Morgen':h<17?'Guten Tag':h<22?'Guten Abend':'Gute Nacht';
+}
+setInterval(tick,10000);tick();
+
+/* ============ Demo-Modus ============ */
+const mk=(id,state,attributes={})=>({entity_id:id,state,attributes:{friendly_name:id.split('.')[1].replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()),...attributes}});
+const DEMO={};
+[
+ mk('camera.haustuer','idle',{friendly_name:'Haustür'}),mk('camera.garten','idle',{friendly_name:'Garten'}),
+ mk('light.wohnzimmer','on',{friendly_name:'Wohnzimmer',brightness:200,rgb_color:[255,170,80],supported_color_modes:['rgb']}),
+ mk('light.kueche','on',{friendly_name:'Küche',brightness:255,rgb_color:[255,236,200],supported_color_modes:['brightness']}),
+ mk('light.schlafzimmer','off',{friendly_name:'Schlafzimmer',supported_color_modes:['brightness']}),
+ mk('light.led_streifen','on',{friendly_name:'LED-Streifen TV',brightness:140,rgb_color:[124,92,255],supported_color_modes:['rgb']}),
+ mk('switch.kaffeemaschine','off',{friendly_name:'Kaffeemaschine',icon:'mdi:coffee-maker'}),
+ mk('switch.steckdose_balkon','on',{friendly_name:'Balkon Lichterkette',icon:'mdi:string-lights'}),
+ mk('cover.rollo_wohnzimmer','open',{friendly_name:'Rollo Wohnzimmer',current_position:70}),
+ mk('lock.haustuer','locked',{friendly_name:'Haustür-Schloss'}),
+ mk('climate.heizung_wohnzimmer','heat',{friendly_name:'Wohnzimmer',temperature:21.5,current_temperature:20.8,hvac_action:'heating',target_temp_step:.5}),
+ mk('media_player.sonos_kueche','playing',{friendly_name:'Sonos Küche',media_title:'Midnight City',media_artist:'M83',volume_level:.35}),
+ mk('sensor.temperatur_aussen','7.4',{friendly_name:'Außentemperatur',unit_of_measurement:'°C',device_class:'temperature'}),
+ mk('sensor.luftfeuchte','54',{friendly_name:'Luftfeuchte',unit_of_measurement:'%',device_class:'humidity'}),
+ mk('sensor.stromverbrauch','412',{friendly_name:'Stromverbrauch',unit_of_measurement:'W',device_class:'power'}),
+ mk('sensor.pv_ertrag','2.8',{friendly_name:'PV Ertrag',unit_of_measurement:'kW',device_class:'power',icon:'mdi:solar-power'}),
+ mk('binary_sensor.fenster_bad','off',{friendly_name:'Fenster Bad',device_class:'window'}),
+ mk('binary_sensor.bewegung_flur','on',{friendly_name:'Bewegung Flur',device_class:'motion'}),
+ mk('person.sebastian','home',{friendly_name:'Sebastian'}),
+ mk('automation.licht_bei_sonnenuntergang','on',{friendly_name:'Licht bei Sonnenuntergang'}),
+ mk('automation.heizung_absenken','on',{friendly_name:'Heizung absenken nachts'}),
+ mk('automation.bewegungsmelder_flur','off',{friendly_name:'Flurlicht bei Bewegung'}),
+ mk('scene.filmabend','off',{friendly_name:'Filmabend',icon:'mdi:movie-open'}),
+ mk('scene.gute_nacht','off',{friendly_name:'Gute Nacht',icon:'mdi:weather-night'}),
+ mk('script.alles_aus','off',{friendly_name:'Alles aus',icon:'mdi:power'}),
+].forEach(s=>DEMO[s.entity_id]=s);
+
+function demoCam(id){
+  const t=new Date().toLocaleTimeString('de-DE'),h=[...id].reduce((a,c)=>a+c.charCodeAt(0)*7,0)%300,n=Math.floor(Math.random()*60);
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(${h},45%,14%)"/><stop offset="1" stop-color="hsl(${h+40},50%,6%)"/></linearGradient></defs><rect width="640" height="360" fill="url(#g)"/><g opacity=".25" fill="hsl(${h},60%,60%)"><rect x="60" y="190" width="170" height="170"/><rect x="250" y="230" width="130" height="130"/><rect x="410" y="170" width="190" height="190"/></g><rect x="${300+n}" y="250" width="26" height="70" rx="12" fill="#000" opacity=".5"/><text x="320" y="190" fill="#fff" fill-opacity=".18" font-family="sans-serif" font-size="30" text-anchor="middle">DEMO-KAMERA</text><text x="620" y="345" fill="#fff" fill-opacity=".5" font-family="monospace" font-size="16" text-anchor="end">${t}</text></svg>`;
+  return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg);
+}
+function startDemoEngine(){
+  states=JSON.parse(JSON.stringify(DEMO));
+  Object.values(states).forEach(s=>{if(dom(s.entity_id)==='camera')s.attributes.entity_picture=demoCam(s.entity_id)});
+  eHist=null;demoRooms=JSON.parse(JSON.stringify(DEMO_ROOMS));demoTick(true);
+  setStatus('online','Demo-Modus');renderAll();
+  demoTimer=setInterval(()=>{
+    const j=(id,d,min,max,dec=1)=>{const s=states[id];s.state=Math.min(max,Math.max(min,+s.state+(Math.random()-.5)*d)).toFixed(dec);updateTile(id)};
+    demoTick();j('sensor.stromverbrauch',120,150,2400,0);j('sensor.temperatur_aussen',.4,-5,30);j('sensor.pv_ertrag',.3,0,6);j('sensor.luftfeuchte',2,30,80,0);
+  },4000);
+}
+function demoCall(d,svc,id,data){
+  const s=states[id];if(!s)return;
+  if(d==='alarm_control_panel'){
+    if(svc==='alarm_disarm'){if(data.code!=='1234'){toast('Falscher Code (Demo: 1234)');return}s.state='disarmed'}
+    else if(svc==='alarm_trigger')s.state='triggered';
+    else{const m=svc.replace('alarm_arm_','armed_');s.state='arming';updateTile(id);setTimeout(()=>{s.state=m;updateTile(id)},2500);return}
+    updateTile(id);return;
+  }
+  const set=v=>s.state=v;
+  if(svc==='toggle'){
+    if(d==='automation'||s.state==='on'||s.state==='off')set(s.state==='on'?'off':'on');
+  }
+  else if(svc==='turn_on')set('on');
+  else if(svc==='turn_off')set('off');
+  else if(svc==='lock')set('locked');else if(svc==='unlock')set('unlocked');
+  if(data.brightness_pct!=null){s.state='on';s.attributes.brightness=Math.round(data.brightness_pct*2.55)}
+  if(d==='light'&&svc==='toggle'&&s.state==='on'&&!s.attributes.brightness)s.attributes.brightness=200;
+  if(data.temperature!=null)s.attributes.temperature=data.temperature;
+  if(svc==='open_cover'){set('open');s.attributes.current_position=100}
+  if(svc==='close_cover'){set('closed');s.attributes.current_position=0}
+  if(svc==='media_play_pause')set(s.state==='playing'?'paused':'playing');
+  if(data.volume_level!=null)s.attributes.volume_level=data.volume_level;
+  if(svc==='trigger'||d==='scene'||d==='script'||d==='button')toast('▶ '+(s.attributes.friendly_name)+' ausgeführt');
+  updateTile(id);
+}
+
+/* ============ Zusätzliche Demo-Daten ============ */
+[
+ mk('camera.garage','idle',{friendly_name:'Garage'}),mk('camera.terrasse','idle',{friendly_name:'Terrasse'}),mk('camera.einfahrt','idle',{friendly_name:'Einfahrt'}),
+ mk('sensor.e_pv','0',{friendly_name:'PV Leistung',unit_of_measurement:'W',device_class:'power'}),
+ mk('sensor.e_netz','0',{friendly_name:'Netz Leistung',unit_of_measurement:'W',device_class:'power'}),
+ mk('sensor.e_haus','0',{friendly_name:'Hausverbrauch',unit_of_measurement:'W',device_class:'power'}),
+ mk('sensor.e_batt','0',{friendly_name:'Batterie Leistung',unit_of_measurement:'W',device_class:'power'}),
+ mk('sensor.e_soc','64',{friendly_name:'Batterie Ladestand',unit_of_measurement:'%',device_class:'battery'}),
+ mk('sensor.e_pvday','11.4',{friendly_name:'PV heute',unit_of_measurement:'kWh',device_class:'energy'}),
+ mk('climate.heizung_schlafzimmer','heat',{friendly_name:'Schlafzimmer',temperature:18,current_temperature:18.4,hvac_action:'idle',target_temp_step:.5}),
+ mk('climate.heizung_buero','heat',{friendly_name:'Büro',temperature:22,current_temperature:21,hvac_action:'heating',target_temp_step:.5}),
+ mk('weather.zuhause','partlycloudy',{friendly_name:'Wetter',temperature:12,temperature_unit:'°C'}),
+ mk('alarm_control_panel.haus','disarmed',{friendly_name:'Alarmanlage',code_arm_required:false,code_format:'number'}),
+ mk('binary_sensor.z_haustuer','off',{friendly_name:'Haustür',device_class:'door'}),
+ mk('binary_sensor.z_terrassentuer','off',{friendly_name:'Terrassentür',device_class:'door'}),
+ mk('binary_sensor.z_fenster_wz','off',{friendly_name:'Fenster Wohnzimmer',device_class:'window'}),
+ mk('binary_sensor.z_fenster_kueche','on',{friendly_name:'Fenster Küche',device_class:'window'}),
+ mk('binary_sensor.z_garagentor','off',{friendly_name:'Garagentor',device_class:'garage_door'}),
+ mk('binary_sensor.z_rauch_flur','off',{friendly_name:'Rauchmelder Flur',device_class:'smoke'}),
+ mk('binary_sensor.z_wasser_keller','off',{friendly_name:'Wassersensor Keller',device_class:'moisture'}),
+].forEach(s=>DEMO[s.entity_id]=s);
+const RT={wohnzimmer:21.4,kueche:21.9,flur:19.8,buero:21.0,bad:23.2,wc:19.5,schlafzimmer:18.4,kinderzimmer:20.6,gaestezimmer:17.8};
+Object.entries(RT).forEach(([k,v])=>{
+  DEMO['sensor.t_'+k]=mk('sensor.t_'+k,v.toFixed(1),{friendly_name:'Temperatur '+k,unit_of_measurement:'°C',device_class:'temperature',base:v});
+  DEMO['sensor.h_'+k]=mk('sensor.h_'+k,String(45+Math.round(v)%12),{friendly_name:'Feuchte '+k,unit_of_measurement:'%',device_class:'humidity'});
+});
+DEMO['sensor.e_batt2']=mk('sensor.e_batt2','0',{friendly_name:'Batterie 2 Leistung',unit_of_measurement:'W',device_class:'power'});
+DEMO['sensor.e_soc2']=mk('sensor.e_soc2','41',{friendly_name:'Batterie 2',unit_of_measurement:'%',device_class:'battery'});
+DEMO['sensor.e_soc'].attributes.friendly_name='Batterie 1';
+DEMO['sensor.e_pv2']=mk('sensor.e_pv2','0',{friendly_name:'Balkonkraftwerk 2 PV',unit_of_measurement:'W',device_class:'power'});
+DEMO['sensor.e_pv'].attributes.friendly_name='Balkonkraftwerk 1 PV';
+const DEMO_E={pv:'sensor.e_pv,sensor.e_pv2',grid:'sensor.e_netz',house:'sensor.e_haus',batt:'sensor.e_batt,sensor.e_batt2',soc:'sensor.e_soc,sensor.e_soc2',pvday:'sensor.e_pvday',cap:'10,5'};
+const DEMO_ROOMS=[
+ {id:'r1',name:'Wohnzimmer',x:1,y:3,w:38,h:50,temp:'sensor.t_wohnzimmer',hum:'sensor.h_wohnzimmer',clim:'climate.heizung_wohnzimmer',light:'light.wohnzimmer'},
+ {id:'r2',name:'Küche',x:39,y:3,w:24,h:30,temp:'sensor.t_kueche',hum:'sensor.h_kueche',light:'light.kueche'},
+ {id:'r3',name:'Flur',x:39,y:33,w:24,h:20,temp:'sensor.t_flur',hum:'sensor.h_flur'},
+ {id:'r4',name:'Büro',x:63,y:3,w:36,h:30,temp:'sensor.t_buero',hum:'sensor.h_buero',clim:'climate.heizung_buero'},
+ {id:'r5',name:'Bad',x:63,y:33,w:21,h:20,temp:'sensor.t_bad',hum:'sensor.h_bad'},
+ {id:'r6',name:'WC',x:84,y:33,w:15,h:20,temp:'sensor.t_wc',hum:'sensor.h_wc'},
+ {id:'r7',name:'Schlafzimmer',x:1,y:53,w:38,h:44,temp:'sensor.t_schlafzimmer',hum:'sensor.h_schlafzimmer',clim:'climate.heizung_schlafzimmer',light:'light.schlafzimmer'},
+ {id:'r8',name:'Kinderzimmer',x:39,y:53,w:30,h:44,temp:'sensor.t_kinderzimmer',hum:'sensor.h_kinderzimmer'},
+ {id:'r9',name:'Gästezimmer',x:69,y:53,w:30,h:44,temp:'sensor.t_gaestezimmer',hum:'sensor.h_gaestezimmer'},
+];
+let demoRooms=JSON.parse(JSON.stringify(DEMO_ROOMS)),eHist=null,eHistT=0,eBuilt='',plan3d=false,roomDrag=null,codeBuf='',pt=0,focusId=null,kioskT=null,kioskIdx=0,lastSt={};
+function demoTick(init){
+  const S=id=>states[id];if(!S('sensor.e_pv'))return;
+  const set=(id,v,d=0)=>{S(id).state=(+v).toFixed(d)},t=Date.now();
+  const pvA=Math.max(0,800*(.55+.4*Math.sin(t/30000))+(Math.random()-.5)*30),pvB=Math.max(0,780*(.55+.4*Math.sin(t/23000+2))+(Math.random()-.5)*30),pv=pvA+pvB;
+  const house=Math.max(250,900+650*(.5+.5*Math.sin(t/17000+1))+(Math.random()-.5)*120);
+  let s1=+S('sensor.e_soc').state,s2=+S('sensor.e_soc2').state;
+  const cl=v=>Math.max(0,Math.min(100,v)),lim=(pvi,s)=>{let p=Math.max(-800,Math.min(800,pvi-house*.275));if(p>0&&s>=99.5)p=0;if(p<0&&s<=6)p=0;return p};
+  const p1=lim(pvA,s1),p2=lim(pvB,s2),batt=p1+p2;
+  s1=cl(s1+(init?0:p1/1000*.35));s2=cl(s2+(init?0:p2/1000*.7));
+  set('sensor.e_pv',pvA);set('sensor.e_pv2',pvB);set('sensor.e_haus',house);set('sensor.e_batt',p1);set('sensor.e_batt2',p2);set('sensor.e_soc',s1,1);set('sensor.e_soc2',s2,1);set('sensor.e_netz',house-pv+batt);
+  if(!init)set('sensor.e_pvday',+S('sensor.e_pvday').state+pv*3/3600e3,2);
+  Object.values(states).filter(s=>/^sensor\.t_/.test(s.entity_id)).forEach(s=>{const b=s.attributes.base;set(s.entity_id,+s.state+(b-+s.state)*.05+(Math.random()-.5)*.12,1)});
+  if(!init)Object.keys(states).filter(k=>/^sensor\.(e_|t_)/.test(k)).forEach(updateTile);
+}
+function demoHist(){
+  const e=DEMO_E,now=Date.now(),o={'sensor.e_pv':[],'sensor.e_pv2':[],[e.house]:[]};
+  for(let t=now-864e5;t<=now;t+=6e5){const d=new Date(t),h=d.getHours()+d.getMinutes()/60,sun=Math.max(0,Math.sin((h-6)/13*Math.PI));
+    o['sensor.e_pv'].push([t,800*Math.pow(sun,1.2)*(.8+.2*Math.sin(t/1.4e5))]);o['sensor.e_pv2'].push([t,780*Math.pow(sun,1.1)*(.8+.2*Math.sin(t/1.1e5+1))]);
+    o[e.house].push([t,500+450*Math.exp(-Math.pow(h-7.5,2)/2)+900*Math.exp(-Math.pow(h-19,2)/3)+250*Math.pow(Math.sin(t/3e5),2)])}
+  return o;
+}
+
+/* ============ Seiten / Navigation ============ */
+const PAGES=[['home','Übersicht','view-dashboard-outline'],['cams','Kameras','cctv'],['energy','Energie','solar-power-variant-outline'],['rooms','Räume & Klima','floor-plan'],['alarm','Alarm','shield-home-outline']];
+let page=(location.hash||'#home').slice(1);if(!PAGES.some(p=>p[0]===page))page='home';
+const alarmTriggered=()=>Object.values(states).some(s=>dom(s.entity_id)==='alarm_control_panel'&&s.state==='triggered');
+function buildNav(){$('#nav').innerHTML=PAGES.map(([id,t,i])=>`<button class="${id===page?'on':''} ${id==='alarm'&&alarmTriggered()?'alarm-on':''}" onclick="showPage('${id}')">${mdi(i)} ${t}</button>`).join('')}
+function showPage(p){
+  page=p;const k=document.body.classList.contains('kiosk');
+  if(!k)try{history.replaceState(null,'','#'+p)}catch{}
+  buildNav();
+  document.querySelectorAll('.page').forEach(e=>e.classList.toggle('show',e.id==='pg-'+p));
+  $('#chips').style.display=p==='home'?'contents':'none';
+  $('#bEdit').style.display=(p==='home'||p==='rooms')?'':'none';
+  $('#bAdd').style.display=(p==='home'&&document.body.classList.contains('edit'))?'':'none';
+  renderPage();
+}
+function renderPage(){
+  Object.values(states).forEach(s=>{if(lastSt[s.entity_id]===undefined)lastSt[s.entity_id]=s.state});
+  alarmBanner();
+  ({cams:renderCams,energy:renderEnergy,rooms:renderRooms,alarm:renderAlarm,kiosk:renderKiosk}[page]||(()=>{}))();
+}
+function schedPage(){
+  if(pt||page==='home'||page==='cams')return;
+  pt=setTimeout(()=>{pt=0;if(roomDrag)return;if(page==='energy')updateEnergy();else if(page==='rooms')updateRooms();else if(page==='alarm'){if(!$('#pg-alarm .agrid:hover'))renderAlarm()}else if(page==='kiosk')renderKiosk()},700);
+}
+function fillEntList(){$('#dlEnt').innerHTML=Object.keys(states).sort().map(i=>`<option value="${i}">`).join('')}
+const camName=id=>cfg.names[id]||states[id]?.attributes.friendly_name||id;
+
+/* ============ Kamera-Multiview ============ */
+const camList=()=>Object.keys(states).filter(i=>dom(i)==='camera').sort();
+const LAYOUTS=[['auto','Auto','view-grid-outline'],['1','1×1','square-outline'],['4','2×2','view-grid'],['9','3×3','dots-grid'],['1p5','1+5','view-dashboard-variant-outline']];
+function camSlots(){
+  const cams=camList(),L=cfg.camLayout||'auto',n=L==='auto'?cams.length:L==='1p5'?6:+L;
+  const cols=L==='1'?1:L==='1p5'?3:L==='4'?2:L==='9'?3:(n<=1?1:n<=4?2:n<=9?3:4);
+  return{cams,L,n,cols,slots:[...Array(n)].map((_,i)=>{const s=cfg.camSel[i];return s==null?(cams[i]||''):s})};
+}
+function renderCams(){
+  const el=$('#pg-cams'),{cams,L,cols,slots}=camSlots();
+  if(!cams.length){el.innerHTML=`<div class="empty"><h3>${mdi('cctv-off')} Keine Kameras gefunden</h3><p>Sobald Home Assistant verbunden ist und Kamera-Entitäten vorhanden sind, erscheinen sie hier.</p></div>`;return}
+  const cell=(id,i)=>{
+    const opts=`<option value="">— leer —</option>`+cams.map(c=>`<option value="${c}" ${c===id?'selected':''}>${esc(camName(c))}</option>`).join('');
+    return `<div class="cell" ${id?`onclick="focusCam('${id}')"`:''}>${id?`<img data-cam="${id}" alt="">`:`<div class="nocam">${mdi('video-off-outline')}</div>`}<div class="ov"></div>
+      ${id?`<span class="rec ${liveCams.has(id)?'live':''}">${liveCams.has(id)?'LIVE':'SNAP'}</span><button class="rb lv" onclick="event.stopPropagation();toggleLive('${id}')">${mdi(liveCams.has(id)?'pause':'play')}</button>`:''}
+      <div class="lbl"><b>${id?esc(camName(id)):'Kein Signal'}</b><select onclick="event.stopPropagation()" onchange="cfg.camSel[${i}]=this.value;save();renderCams()">${opts}</select></div></div>`};
+  el.innerHTML=`<div class="toolbar"><div class="seg">${LAYOUTS.map(([id,t,i])=>`<button class="${L===id?'on':''}" onclick="cfg.camLayout='${id}';save();renderCams()">${mdi(i)} ${t}</button>`).join('')}</div>
+    <button class="btn" onclick="allLive()">${mdi('broadcast')} Alle live</button><button class="btn" onclick="document.querySelector('#pg-cams .mv').requestFullscreen?.()">${mdi('fullscreen')} Vollbild</button>
+    <div class="sp"></div><span class="chip">${mdi('cctv')}<b>${cams.length}</b> Kameras</span></div>
+    <div class="mv ${L==='1p5'?'l1p5':''}" style="grid-template-columns:repeat(${cols},1fr)">${slots.map(cell).join('')}</div>`;
+  el.querySelectorAll('img[data-cam]').forEach(refreshCam);
+}
+function allLive(){const ids=camSlots().slots.filter(Boolean),all=ids.every(i=>liveCams.has(i));ids.forEach(i=>all?liveCams.delete(i):liveCams.add(i));document.querySelectorAll('img[data-cam]').forEach(i=>i.dataset.live='');renderCams()}
+function toggleLive(id){liveCams.has(id)?liveCams.delete(id):liveCams.add(id);document.querySelectorAll(`img[data-cam="${id}"]`).forEach(i=>i.dataset.live='');renderCams();if($('#mCam').classList.contains('open'))focusCam(id)}
+function focusCam(id){
+  focusId=id;
+  $('#mCamBody').innerHTML=`<div class="row" style="align-items:center;margin-bottom:12px"><h3 style="margin:0">${esc(camName(id))}</h3><div class="ctl"><button class="rb" onclick="stepCam(-1)">${mdi('chevron-left')}</button><button class="rb" onclick="stepCam(1)">${mdi('chevron-right')}</button><button class="rb" onclick="toggleLive('${id}')">${mdi(liveCams.has(id)?'pause':'play')}</button><button class="rb" onclick="closeModals()">${mdi('close')}</button></div></div><div class="bigview"><img data-cam="${id}" alt=""></div>`;
+  $('#mCam').classList.add('open');refreshCam($('#mCamBody img'));
+}
+function stepCam(d){const l=camList(),i=(l.indexOf(focusId)+d+l.length)%l.length;focusCam(l[i])}
+
+/* ============ Energie ============ */
+const eCfg=()=>cfg.demo?DEMO_E:(cfg.energy||{});
+const uf=s=>{const u=s?.attributes?.unit_of_measurement;return u==='kW'?1000:u==='MW'?1e6:1};
+const elist=k=>String(eCfg()[k]||'').split(',').map(x=>x.trim()).filter(Boolean);
+const pw=k=>{let t=null;elist(k).forEach(id=>{const s=states[id];if(!s)return;const n=num(s.state);if(n!=null)t=(t||0)+n*uf(s)});return t};
+const fw=w=>Math.abs(w)>=1000?(w/1000).toFixed(2)+' kW':Math.round(w)+' W';
+function energyVals(){
+  const e=eCfg();let pv=pw('pv'),grid=pw('grid'),batt=pw('batt'),house=pw('house');
+  const ids=elist('soc'),caps=String(e.cap||'').split(',').map(x=>+x||0),pids=elist('batt');
+  const bats=ids.map((id,i)=>{const s=states[id],ps=pids.length===ids.length?states[pids[i]]:null;let p=ps?num(ps.state):null;if(p!=null)p*=uf(ps);if(p!=null&&e.invBatt)p=-p;
+    return{id,soc:s?num(s.state):null,cap:caps[i]||0,p,name:s?.attributes.friendly_name||'Batterie '+(i+1)}});
+  const known=bats.filter(b=>b.soc!=null),capTot=bats.reduce((a,b)=>a+b.cap,0);
+  let soc=null;if(known.length){const w=known.reduce((a,b)=>a+(b.cap||1),0);soc=known.reduce((a,b)=>a+b.soc*(b.cap||1),0)/w}
+  let day=null;elist('pvday').forEach(id=>{const s=states[id];if(!s)return;let n=num(s.state);if(n==null)return;if(s.attributes.unit_of_measurement==='Wh')n/=1000;day=(day||0)+n});
+  if(e.invGrid&&grid!=null)grid=-grid;if(e.invBatt&&batt!=null)batt=-batt;
+  pv=pv??0;grid=grid??0;batt=batt??0;if(house==null)house=Math.max(0,pv+grid-batt);
+  const aut=house>0?Math.max(0,Math.min(100,(1-Math.max(grid,0)/house)*100)):100;
+  const eig=pv>0?Math.max(0,Math.min(100,(pv-Math.max(-grid,0))/pv*100)):0;
+  if(!bats.length&&pids.length)bats.push({id:null,soc:null,cap:0,p:batt,name:'Batterie'});
+  const cs=bats.reduce((a,b)=>a+(b.cap||1),0);
+  const pvids=elist('pv'),unitPv=bats.length>1&&pvids.length===bats.length;
+  bats.forEach((b,i)=>{
+    if(b.p==null)b.p=batt*(b.cap||1)/cs;
+    const ps=unitPv?states[pvids[i]]:null,pn=ps?num(ps.state):null;
+    b.pv=unitPv?(pn==null?0:pn*uf(ps)):pv*(b.cap||1)/cs;b.h=b.pv-b.p});
+  return{pv,grid,batt,house,soc,day,aut,eig,cap:capTot,bats};
+}
+function ring(id,color,label,sub){return `<div class="ring"><svg viewBox="0 0 128 128"><circle class="bg" cx="64" cy="64" r="52"/><circle class="fg" id="${id}" cx="64" cy="64" r="52" stroke="${color}" stroke-dasharray="0 327"/></svg><div class="c"><b id="${id}-t">–</b><small>${sub}</small></div></div><div class="cap">${label}</div>`}
+function renderEnergy(){
+  const el=$('#pg-energy'),e=eCfg(),key=JSON.stringify(e)+cfg.demo;
+  if(!e.pv&&!e.grid&&!e.house&&!e.batt){eBuilt='';el.innerHTML=`<div class="empty"><h3>${mdi('solar-power-variant-outline')} Energie noch nicht eingerichtet</h3><p>Ordne deine PV-, Netz-, Haus- und Batterie-Sensoren zu.</p><button class="btn primary" onclick="openEnergyCfg()">${mdi('link-variant')} Sensoren zuordnen</button></div>`;return}
+  if(eBuilt!==key){eBuilt=key;
+    const nd=(cx,cy,c,ic,id,lab)=>`<foreignObject x="${cx-110}" y="${cy-110}" width="220" height="220" style="overflow:visible"><div class="ndw"><div class="nd idle" style="--c:${c}"><i class="mdi mdi-${ic}"></i><b id="${id}">–</b><small id="${id}-l">${lab}</small></div></div></foreignObject>`;
+    const fp=(id,d,c)=>`<path id="${id}-p" class="fl" d="${d}"/><path id="${id}-g" d="${d}" fill="none" stroke="${c}" stroke-width="12" stroke-linecap="round" filter="url(#glow)" opacity="0" style="transition:opacity .6s"/><path id="${id}" class="fa idle" stroke="${c}" d="${d}"/><g id="${id}-pt" style="transition:opacity .6s;opacity:0">${[0,1,2,3].map(i=>`<circle r="5.5" fill="${c}" stroke="#fff" stroke-width="1.5" style="filter:drop-shadow(0 0 5px ${c}) drop-shadow(0 0 12px ${c})"><animateMotion dur="2s" begin="${-i*.5}s" repeatCount="indefinite" calcMode="linear" keyPoints="0;1" keyTimes="0;1"><mpath href="#${id}-p"/></animateMotion></circle>`).join('')}</g>`;
+    el.innerHTML=`<div class="toolbar"><div class="sp"></div><button class="btn" onclick="openEnergyCfg()">${mdi('link-variant')} Sensoren zuordnen</button></div>
+    <div class="egrid"><div class="estack">
+      <div class="card flowcard"><h4>Live-Energiefluss</h4><svg class="flow" viewBox="0 0 1000 ${battSvg(fp,nd).h}" style="overflow:visible">
+        <defs><filter id="glow" filterUnits="userSpaceOnUse" x="-60" y="-60" width="1120" height="${battSvg(fp,nd).h+120}"><feGaussianBlur stdDeviation="7"/></filter></defs>
+        ${battSvg(fp,nd).all}
+      </svg></div>
+      <div class="card"><div class="row" style="align-items:center"><h4>Letzte 24 Stunden</h4><div class="leg"><span><i style="background:#fbbf24"></i>Solar</span><span><i style="background:#a78bfa"></i>Verbrauch</span></div></div><div id="e-chart"></div></div>
+    </div><div class="estack">
+      <div class="card"><h4>Batterie</h4>${ring('r-soc','#34d399','','Ladestand')}<div class="cap" id="e-bt">–</div><div class="k2" id="e-bats" style="margin-top:16px"></div></div>
+      <div class="k2"><div class="card"><h4>Autarkie</h4>${ring('r-aut','#7c5cff','','')}</div><div class="card"><h4>Eigenverbrauch</h4>${ring('r-eig','#38bdf8','','')}</div></div>
+      <div class="k2"><div class="card"><h4>PV heute</h4><div class="bigv" id="k-day">–</div></div><div class="card"><h4>Netz</h4><div class="bigv" id="k-grid" style="font-size:24px">–</div></div></div>
+    </div></div>`;
+  }
+  updateEnergy();loadEHist();
+}
+const BCOL=['#34d399','#2dd4bf','#a3e635','#22d3ee'];
+/* Topologie: Netz ↔ Haus ← Batterie(n) ← Solar (Solar läuft durch die Batterie ins Haus) */
+function battSvg(fp,nd){
+  const n=Math.max(0,Math.min(4,elist('soc').length||(elist('batt').length?1:0)));
+  const Y=330,xN=110,xH=370,xB=630,xP=890,R=72;
+  const ys=n>1?[...Array(n)].map((_,i)=>Y+(i-(n-1)/2)*170):[Y];
+  const lab=(id,x,y)=>`<text id="${id}" x="${x}" y="${y}" text-anchor="middle" class="elab"></text>`;
+  let s=fp('f-grid',`M${xN+R} ${Y}H${xH-R}`,'#38bdf8')+lab('l-grid',(xN+xH)/2,Y-18);
+  if(!n){
+    s+=fp('f-ph',`M${xB-R} ${Y}H${xH+R}`,'#fbbf24')+lab('l-ph',(xB+xH)/2,Y-18)+nd(xB,Y,'#fbbf24','white-balance-sunny','e-pv','Solar');
+  }else{
+    const unit=n>1&&elist('pv').length===n;   // Balkonkraftwerke: je Einheit eigene Panels + Batterie
+    ys.forEach((y,i)=>{
+      const straight=y===Y||unit,ly=y===Y||unit?y-18:(y+Y)/2+(y<Y?-14:26);
+      s+=fp('f-pb'+i,unit||y===Y?`M${xP-R} ${y}H${xB+R}`:`M${xP-R} ${Y}C${xP-130} ${Y} ${xP-130} ${y} ${xB+R} ${y}`,'#fbbf24')+lab('l-pb'+i,(xP+xB)/2,ly);
+      s+=fp('f-bh'+i,y===Y?`M${xB-R} ${Y}H${xH+R}`:`M${xB-R} ${y}C${xB-130} ${y} ${xB-130} ${Y} ${xH+R} ${Y}`,BCOL[i])+lab('l-bh'+i,(xB+xH)/2,y===Y?Y-18:(y+Y)/2+(y<Y?-14:26));
+      if(unit)s+=nd(xP,y,'#fbbf24','white-balance-sunny','e-p'+i,'Solar '+(i+1));
+    });
+    if(!unit)s+=nd(xP,Y,'#fbbf24','white-balance-sunny','e-pv','Solar');
+    ys.forEach((y,i)=>{s+=nd(xB,y,BCOL[i],'battery-high','e-b'+i,n>1?'Batterie '+(i+1):'Batterie')});
+  }
+  s+=nd(xH,Y,'#a78bfa','home-lightning-bolt-outline','e-house','Verbrauch')+nd(xN,Y,'#38bdf8','transmission-tower','e-grid','Netz');
+  return{h:Math.max(470,ys[ys.length-1]+120),all:s};
+}
+function flow(id,w,rev){
+  const p=$('#'+id);if(!p)return;const on=w>=30;
+  p.setAttribute('class','fa'+(on?'':' idle')+(rev?' rev':''));p.style.animationDuration=Math.max(.5,2.4-w/3200*1.9)+'s';p.style.strokeWidth=3+Math.min(w/1500,4);
+  $('#'+id+'-g').setAttribute('opacity',on?Math.min(.3+w/6000,.75):0);
+  const g=$('#'+id+'-pt');g.style.opacity=on?1:0;
+  const dur=+Math.max(.9,3.4-w/3000*2.3).toFixed(1),key=''+rev+dur;
+  if(on&&g.dataset.k!==key){g.dataset.k=key;g.querySelectorAll('animateMotion').forEach((a,i)=>{a.setAttribute('dur',dur+'s');a.setAttribute('begin',(-i*dur/4)+'s');a.setAttribute('keyPoints',rev?'1;0':'0;1')})}
+}
+const battIcon=(soc,ch)=>{if(soc==null)return ch?'battery-charging':'battery-high';const n=Math.max(10,Math.min(100,Math.round(soc/10)*10));return ch?`battery-charging-${n}`:(n>=100?'battery':`battery-${n}`)};
+function nodeState(valId,on,gs,icon){const n=$('#'+valId)?.closest('.nd');if(!n)return;n.classList.toggle('idle',!on);n.style.setProperty('--gs',gs+'px');if(icon){const i=n.querySelector('i');i.className='mdi mdi-'+icon}}
+function setRing(id,pct,color,txt){const c=$('#'+id);if(!c)return;c.setAttribute('stroke-dasharray',`${327*Math.max(0,Math.min(100,pct))/100} 327`);if(color)c.setAttribute('stroke',color);$('#'+id+'-t').textContent=txt}
+function updateEnergy(){
+  if(!$('#e-house'))return;const v=energyVals(),T=(id,t)=>{const x=$('#'+id);if(x)x.textContent=t};
+  T('e-pv',fw(v.pv));T('e-house',fw(v.house));T('e-grid',fw(Math.abs(v.grid)));T('e-batt',v.soc!=null?Math.round(v.soc)+' %':fw(v.batt));
+  T('e-grid-l',v.grid>=50?'Netzbezug':v.grid<=-50?'Einspeisung':'Netz');
+  T('e-batt-l',v.batt>=50?'Lädt '+fw(v.batt):v.batt<=-50?'Entlädt '+fw(-v.batt):(v.bats.length>1?v.bats.length+' Batterien':'Batterie'));
+  flow('f-pv',v.pv,false);flow('f-grid',Math.abs(v.grid),v.grid<0);flow('f-batt',Math.abs(v.batt),v.batt<0);
+  T('l-pv',v.pv>=30?fw(v.pv):'');T('l-grid',Math.abs(v.grid)>=30?(v.grid<0?'← ':'')+fw(Math.abs(v.grid))+(v.grid>0?' →':''):'');T('l-batt',Math.abs(v.batt)>=30?(v.batt>0?'':'← ')+fw(Math.abs(v.batt))+(v.batt>0?' →':''):'');
+  nodeState('e-pv',v.pv>=30,16+Math.min(v.pv/120,40));
+  nodeState('e-house',v.house>=30,16+Math.min(v.house/100,34));
+  nodeState('e-grid',Math.abs(v.grid)>=30,16+Math.min(Math.abs(v.grid)/100,34));
+  nodeState('e-batt',Math.abs(v.batt)>=30||v.soc!=null,16+Math.min(Math.abs(v.batt)/100,34),battIcon(v.soc,v.batt>=50));
+  $('#e-pv')?.closest('.nd').classList.toggle('spin',v.pv>=30);
+  v.bats.forEach((b,i)=>{if(!$('#e-p'+i))return;T('e-p'+i,fw(b.pv));nodeState('e-p'+i,b.pv>=30,16+Math.min(b.pv/40,40));$('#e-p'+i).closest('.nd').classList.toggle('spin',b.pv>=30)});
+  if(!v.bats.length){flow('f-ph',v.pv,false);T('l-ph',v.pv>=30?fw(v.pv):'')}
+  v.bats.forEach((b,i)=>{
+    const p=b.p||0,h=b.h||0;
+    flow('f-pb'+i,b.pv,false);flow('f-bh'+i,Math.abs(h),h<0);
+    T('l-pb'+i,b.pv>=30?fw(b.pv):'');T('l-bh'+i,Math.abs(h)>=30?(h<0?'← ':'')+fw(Math.abs(h)):'');
+    T('e-b'+i,b.soc!=null?Math.round(b.soc)+' %':fw(p));
+    T('e-b'+i+'-l',p>=50?'Lädt '+fw(p):p<=-50?'Entlädt '+fw(-p):(b.cap?b.cap+' kWh':v.bats.length>1?'Batterie '+(i+1):'Batterie'));
+    nodeState('e-b'+i,Math.abs(p)>=30||Math.abs(h)>=30||b.soc!=null,16+Math.min((Math.abs(p)+Math.abs(h))/100,34),battIcon(b.soc,p>=50));
+  });
+  const sc=v.soc==null?'#8b90a3':v.soc<20?'#f87171':v.soc<45?'#fbbf24':'#34d399';
+  setRing('r-soc',v.soc||0,sc,v.soc!=null?Math.round(v.soc)+'%':'–');
+  const bc=$('#e-bats');
+  if(bc){
+    if(v.bats.length>1){
+      if(bc.dataset.n!==''+v.bats.length){bc.dataset.n=v.bats.length;bc.innerHTML=v.bats.map((b,i)=>`<div>${ring('r-b'+i,'#34d399',`<span id="r-b${i}-n"></span>`,'')}</div>`).join('')}
+      v.bats.forEach((b,i)=>{const c=b.soc==null?'#8b90a3':b.soc<20?'#f87171':b.soc<45?'#fbbf24':'#34d399';
+        setRing('r-b'+i,b.soc||0,c,b.soc!=null?Math.round(b.soc)+'%':'–');
+        const n=$('#r-b'+i+'-n');if(n)n.textContent=`${b.name.replace(/ Ladestand| SOC| soc/i,'')}${b.p!=null&&Math.abs(b.p)>=50?' · '+(b.p>0?'lädt ':'entl. ')+fw(Math.abs(b.p)):''}${b.cap?' · '+b.cap+' kWh':''}`});
+    }else if(bc.dataset.n){bc.dataset.n='';bc.innerHTML=''}
+  }
+  setRing('r-aut',v.aut,null,Math.round(v.aut)+'%');setRing('r-eig',v.eig,null,Math.round(v.eig)+'%');
+  let bt='Bereit';
+  if(v.batt>=50)bt='Lädt mit '+fw(v.batt)+(v.cap&&v.soc!=null?` · voll in ${fh((100-v.soc)/100*v.cap/(v.batt/1000))}`:'');
+  else if(v.batt<=-50)bt='Entlädt mit '+fw(-v.batt)+(v.cap&&v.soc!=null?` · leer in ${fh(v.soc/100*v.cap/(-v.batt/1000))}`:'');
+  T('e-bt',bt);
+  T('k-day',v.day!=null?v.day.toFixed(1)+' kWh':'–');
+  T('k-grid',v.grid>=50?'Bezug '+fw(v.grid):v.grid<=-50?'Einspeisung '+fw(-v.grid):'ausgeglichen');
+}
+const fh=h=>{if(!isFinite(h)||h>48)return '–';const m=Math.round(h*60);return m>=60?Math.floor(m/60)+' h '+(m%60)+' min':m+' min'};
+async function loadEHist(){
+  if(eHist&&Date.now()-eHistT<3e5){drawChart();return}
+  eHistT=Date.now();
+  if(cfg.demo){eHist=demoHist();drawChart();return}
+  const ids=[...elist('pv'),...elist('house')];if(!ids.length||!ws||ws.readyState!==1)return;
+  try{const end=new Date(),start=new Date(end-864e5);
+    const r=await send({type:'history/history_during_period',start_time:start.toISOString(),end_time:end.toISOString(),entity_ids:ids,include_start_time_state:true,significant_changes_only:false,minimal_response:true,no_attributes:true});
+    eHist={};ids.forEach(id=>eHist[id]=(r[id]||[]).map(x=>[x.lu!=null?x.lu*1000:x.last_updated?Date.parse(x.last_updated):+start,parseFloat(x.s??x.state)*uf(states[id])]).filter(p=>!isNaN(p[1])));
+  }catch{}
+  drawChart();
+}
+function drawChart(tid='e-chart'){
+  const el=$('#'+tid);if(!el||!eHist)return;
+  const e=eCfg(),t0=Date.now()-864e5,W=800,H=200,L=44,R=10,Tp=10,B=24;
+  const buck=pts=>{const n=96,sum=Array(n).fill(0),c=Array(n).fill(0);pts.forEach(([t,v])=>{const i=Math.floor((t-t0)/864e5*n);if(i>=0&&i<n){sum[i]+=v;c[i]++}});
+    const out=[];let last=null;for(let i=0;i<n;i++){if(c[i])last=sum[i]/c[i];out.push([t0+(i+.5)*864e5/n,last??0])}return out};
+  const comb=ids=>{const ls=ids.filter(i=>eHist[i]).map(i=>buck(eHist[i]));return ls.length?ls[0].map((q,j)=>[q[0],ls.reduce((a,l)=>a+l[j][1],0)]):[]};
+  const data=[[elist('pv'),'#fbbf24'],[elist('house'),'#a78bfa']].map(([ids,c])=>({c,p:comb(ids)})).filter(d=>d.p.length);
+  const max=Math.max(1000,...data.flatMap(d=>d.p.map(x=>x[1])))*1.1;
+  const X=t=>L+(t-t0)/864e5*(W-L-R),Y=v=>Tp+(1-v/max)*(H-Tp-B);
+  let g='';
+  for(let i=0;i<=4;i++){const v=max*i/4,y=Y(v);g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="rgba(255,255,255,.07)"/><text x="${L-6}" y="${y+4}" text-anchor="end">${v>=1000?(v/1000).toFixed(1)+'k':Math.round(v)}</text>`}
+  for(let h=0;h<=24;h+=6){const t=t0+h*36e5;g+=`<text x="${X(t)}" y="${H-6}" text-anchor="middle">${String(new Date(t).getHours()).padStart(2,'0')}:00</text>`}
+  data.forEach((d,i)=>{if(!d.p.length)return;
+    const line=d.p.map((q,j)=>(j?'L':'M')+X(q[0]).toFixed(1)+' '+Y(q[1]).toFixed(1)).join('');
+    g+=`<defs><linearGradient id="gr${i}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${d.c}" stop-opacity=".45"/><stop offset="1" stop-color="${d.c}" stop-opacity="0"/></linearGradient></defs><path d="${line}L${X(d.p[d.p.length-1][0])} ${Y(0)}L${X(d.p[0][0])} ${Y(0)}Z" fill="url(#gr${i})"/><path d="${line}" fill="none" stroke="${d.c}" stroke-width="2.4" stroke-linejoin="round"/>`});
+  el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" class="chart" width="100%">${g}</svg>`;
+}
+function openEnergyCfg(){
+  fillEntList();const e=cfg.energy||{};
+  const f=(k,l,h)=>`<label>${l}</label><input type="text" list="dlEnt" id="en-${k}" value="${esc(e[k]||'')}" placeholder="${h}">`;
+  $('#mEnergyBody').innerHTML=`<h3>Energie-Sensoren zuordnen</h3><p>Wähle die Entitäten aus Home Assistant. Leistungen in W oder kW, Ladestand in %.</p>
+    ${f('pv','PV-Leistung – bei Balkonkraftwerken je Einheit ein Sensor, Komma-getrennt, gleiche Reihenfolge wie die Batterien','sensor.bkw1_power, sensor.bkw2_power')}${f('grid','Netz-Leistung (positiv = Bezug)','sensor.grid_power')}${f('house','Hausverbrauch (optional – sonst berechnet)','sensor.house_power')}
+    ${f('batt','Batterie-Leistung (positiv = Laden) – bei mehreren Batterien Komma-getrennt, gleiche Reihenfolge wie Ladestand','sensor.bat1_power, sensor.bat2_power')}${f('soc','Batterie-Ladestand – mehrere Batterien Komma-getrennt','sensor.bat1_soc, sensor.bat2_soc')}${f('pvday','PV-Ertrag heute (kWh)','sensor.pv_energy_today')}
+    <label>Batteriekapazität in kWh (optional, je Batterie Komma-getrennt)</label><input type="text" id="en-cap" value="${esc(e.cap||'')}" placeholder="10, 5">
+    <label><input type="checkbox" id="en-ig" ${e.invGrid?'checked':''}> Netz-Vorzeichen umkehren</label><label><input type="checkbox" id="en-ib" ${e.invBatt?'checked':''}> Batterie-Vorzeichen umkehren</label>
+    <div class="acts2"><button class="btn primary" onclick="saveEnergyCfg()">Speichern</button><button class="btn" onclick="closeModals()">Abbrechen</button></div>`;
+  $('#mEnergy').classList.add('open');
+}
+function saveEnergyCfg(){const o={};['pv','grid','house','batt','soc','pvday'].forEach(k=>o[k]=$('#en-'+k).value.trim());o.cap=$('#en-cap').value.trim();o.invGrid=$('#en-ig').checked;o.invBatt=$('#en-ib').checked;cfg.energy=o;save();closeModals();eBuilt='';eHist=null;renderEnergy()}
+
+/* ============ Räume & Klima ============ */
+const roomsRef=()=>cfg.demo?demoRooms:cfg.rooms;
+const planImg=()=>cfg.demo?'':cfg.plan;
+function roomTemp(r){let t=r.temp&&states[r.temp]?num(states[r.temp].state):null;if(t==null){const c=r.clim&&states[r.clim];t=c?num(c.attributes.current_temperature):null}return t}
+const tColor=t=>t==null?'hsl(0 0% 42%)':`hsl(${Math.round(Math.max(0,Math.min(210,210-(t-16)*(200/12))))} 80% 55%)`;
+const isHeating=r=>{const c=r.clim&&states[r.clim];return !!c&&(c.attributes.hvac_action==='heating'||(c.state==='heat'&&c.attributes.hvac_action==null&&roomTemp(r)<c.attributes.temperature))};
+function roomInner(r){
+  const t=roomTemp(r),h=r.hum&&states[r.hum]?num(states[r.hum].state):null,on=r.light&&states[r.light]?.state==='on';
+  return `<div class="rn">${esc(r.name)}</div><div class="rt">${t!=null?t.toFixed(1)+'°':'–'}</div><div class="rh">${h!=null?mdi('water-percent')+Math.round(h)+'%':''}${isHeating(r)?`<span style="color:#fb923c">${mdi('fire')}</span>`:''}${on?`<span style="color:#fbbf24">${mdi('lightbulb-on')}</span>`:''}</div>`;
+}
+function renderRooms(){
+  const el=$('#pg-rooms'),R=roomsRef();
+  if(!R.length&&!cfg.plan){el.innerHTML=`<div class="empty"><h3>${mdi('floor-plan')} Noch keine Räume</h3><p>Starte mit einem Beispiel-Grundriss oder lade ein Bild deines Grundrisses (z. B. aus CAD exportiert als PNG/JPG) und lege Räume darüber.</p><button class="btn primary" onclick="sampleRooms()">${mdi('auto-fix')} Beispiel-Grundriss</button><button class="btn" onclick="newRoom()">${mdi('plus')} Raum hinzufügen</button><button class="btn" onclick="$('#planFile').click()">${mdi('image-plus')} Grundriss-Bild laden</button></div>`;return}
+  const ts=R.map(r=>[r,roomTemp(r)]).filter(x=>x[1]!=null).sort((a,b)=>a[1]-b[1]);
+  const avg=ts.length?ts.reduce((a,x)=>a+x[1],0)/ts.length:null,img=planImg();
+  el.innerHTML=`<div class="toolbar"><div class="seg"><button id="sg2" class="${plan3d?'':'on'}" onclick="set3d(false)">${mdi('floor-plan')} 2D</button><button id="sg3" class="${plan3d?'on':''}" onclick="set3d(true)">${mdi('cube-outline')} 3D</button></div>
+    ${avg!=null?`<span class="chip">${mdi('thermometer')}Ø <b>${avg.toFixed(1)}°</b></span><span class="chip">${mdi('thermometer-high')}<b>${esc(ts[ts.length-1][0].name)}</b> ${ts[ts.length-1][1].toFixed(1)}°</span><span class="chip">${mdi('thermometer-low')}<b>${esc(ts[0][0].name)}</b> ${ts[0][1].toFixed(1)}°</span>`:''}
+    <div class="sp"></div><button class="btn edtool" onclick="newRoom()">${mdi('plus')} Raum</button><button class="btn edtool" onclick="$('#planFile').click()">${mdi('image-plus')} Grundriss-Bild</button>${img?`<button class="btn edtool" onclick="setPlan('')">${mdi('image-remove')} Bild entfernen</button>`:''}</div>
+    <div class="planwrap"><div class="plan ${plan3d?'d3':''} ${img?'img':''}" id="plan" ${img?`style="background-image:url('${img}')"`:''}>${R.map(roomHTML).join('')}</div></div>
+    <div style="margin-top:14px"><div class="legbar"></div><div class="legend"><span>16°</span><span>22°</span><span>28°</span></div></div>
+    <p class="cap" style="text-align:left">Tipp: Im Bearbeiten-Modus Räume verschieben (ziehen) und in der Größe ändern (Ecke unten rechts). Eigenen Grundriss aus CAD als Bild exportieren und hier laden – 3D-Ansicht zeigt die Räume als Volumen.</p>`;
+}
+function roomHTML(r){
+  return `<div class="room ${isHeating(r)?'heat':''}" data-r="${r.id}" onclick="roomClick('${r.id}')" style="left:${r.x}%;top:${r.y}%;width:${r.w}%;height:${r.h}%;--c:${tColor(roomTemp(r))}">${[0,1,2,3,4,5,6].map(i=>`<i class="wl" style="--z:${i*5}px"></i>`).join('')}<div class="rc">${roomInner(r)}</div><div class="rtools"><button onclick="event.stopPropagation();openRoomEdit('${r.id}')">${mdi('pencil')}</button></div><div class="rsz"></div></div>`;
+}
+function updateRooms(){
+  roomsRef().forEach(r=>{const el=document.querySelector(`.room[data-r="${r.id}"]`);if(!el)return;el.style.setProperty('--c',tColor(roomTemp(r)));el.classList.toggle('heat',isHeating(r));el.querySelector('.rc').innerHTML=roomInner(r)});
+  if($('#mRoomView').classList.contains('open')&&viewRoom)openRoom(viewRoom);
+}
+function set3d(on){plan3d=on;$('#plan')?.classList.toggle('d3',on);$('#sg2')?.classList.toggle('on',!on);$('#sg3')?.classList.toggle('on',on)}
+let viewRoom=null;
+function roomClick(id){if(document.body.classList.contains('edit'))return;openRoom(id)}
+function openRoom(id){
+  viewRoom=id;const r=roomsRef().find(x=>x.id===id);if(!r)return;
+  const t=roomTemp(r),h=r.hum&&states[r.hum]?num(states[r.hum].state):null,c=r.clim&&states[r.clim],l=r.light&&states[r.light];
+  $('#mRoomBody').innerHTML=`<div class="row" style="align-items:center"><h3 style="margin:0">${esc(r.name)}</h3><button class="rb" onclick="closeModals()">${mdi('close')}</button></div>
+    <div class="row" style="margin:18px 0"><div><div class="bigv" style="font-size:54px">${t!=null?t.toFixed(1)+'°':'–'}</div><div class="st">Raumtemperatur</div></div><div style="text-align:right"><div class="bigv">${h!=null?Math.round(h)+'%':'–'}</div><div class="st">Luftfeuchte</div></div></div>
+    ${c?`<div class="card"><h4>Heizung · ${isHeating(r)?'heizt':'bereit'}</h4><div class="ctl"><button class="rb" onclick="roomAdj('${r.id}',-1)">${mdi('minus')}</button><div class="t" style="font-size:34px">${c.attributes.temperature!=null?c.attributes.temperature.toFixed(1):'–'}°</div><button class="rb" onclick="roomAdj('${r.id}',1)">${mdi('plus')}</button></div></div>`:''}
+    ${l?`<button class="btn" style="margin-top:12px;width:100%;justify-content:center" onclick="call('homeassistant','toggle','${r.light}');setTimeout(()=>openRoom('${r.id}'),400)">${mdi('lightbulb')} Licht ${l.state==='on'?'ausschalten':'einschalten'}</button>`:''}`;
+  $('#mRoomView').classList.add('open');
+}
+function roomAdj(id,d){const r=roomsRef().find(x=>x.id===id),c=states[r.clim];call('climate','set_temperature',r.clim,{temperature:+((c.attributes.temperature||20)+d*(c.attributes.target_temp_step||.5)).toFixed(1)});setTimeout(()=>openRoom(id),400)}
+function newRoom(){const r={id:'r'+Date.now(),name:'Neuer Raum',x:30,y:30,w:25,h:25};roomsRef().push(r);save();renderRooms();openRoomEdit(r.id)}
+function sampleRooms(){cfg.rooms=DEMO_ROOMS.map(r=>({id:r.id,name:r.name,x:r.x,y:r.y,w:r.w,h:r.h}));save();renderRooms();toast('Beispiel-Grundriss geladen – Sensoren je Raum mit ✎ zuordnen (Bearbeiten-Modus)')}
+function openRoomEdit(id){
+  fillEntList();const r=roomsRef().find(x=>x.id===id);
+  const f=(k,l,h)=>`<label>${l}</label><input type="text" list="dlEnt" id="re-${k}" value="${esc(r[k]||'')}" placeholder="${h}">`;
+  $('#mRoomEditBody').innerHTML=`<h3>Raum bearbeiten</h3><label>Name</label><input type="text" id="re-name" value="${esc(r.name)}">
+    ${f('temp','Temperatur-Sensor','sensor.temperatur_wohnzimmer')}${f('hum','Feuchte-Sensor (optional)','sensor.feuchte_wohnzimmer')}${f('clim','Heizung / Klima (optional)','climate.wohnzimmer')}${f('light','Licht (optional)','light.wohnzimmer')}
+    <div class="acts2"><button class="btn primary" onclick="saveRoom('${id}')">Speichern</button><button class="btn" onclick="delRoom('${id}')">${mdi('delete-outline')} Löschen</button><button class="btn" onclick="closeModals()">Abbrechen</button></div>`;
+  $('#mRoomEdit').classList.add('open');
+}
+function saveRoom(id){const r=roomsRef().find(x=>x.id===id);r.name=$('#re-name').value.trim()||'Raum';['temp','hum','clim','light'].forEach(k=>r[k]=$('#re-'+k).value.trim());save();closeModals();renderRooms()}
+function delRoom(id){const a=roomsRef();a.splice(a.findIndex(x=>x.id===id),1);save();closeModals();renderRooms()}
+let demoPlan='';
+function setPlan(d){if(cfg.demo){toast('Im Demo-Modus nicht verfügbar');return}cfg.plan=d;try{save()}catch{toast('Bild zu groß für den Browser-Speicher')}renderRooms()}
+$('#planFile').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;if(cfg.demo){toast('Bitte erst mit Home Assistant verbinden');return}
+  const im=new Image();im.onload=()=>{const k=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);setPlan(c.toDataURL('image/jpeg',.85))};
+  im.src=URL.createObjectURL(f);e.target.value='';
+});
+document.addEventListener('pointerdown',e=>{
+  const p=e.target.closest?.('#plan');if(!p||!document.body.classList.contains('edit')||plan3d||e.target.closest('.rtools'))return;
+  const rm=e.target.closest('.room');if(!rm)return;
+  const r=roomsRef().find(x=>x.id===rm.dataset.r);
+  roomDrag={r,el:rm,mode:e.target.closest('.rsz')?'size':'move',sx:e.clientX,sy:e.clientY,ox:r.x,oy:r.y,ow:r.w,oh:r.h,rect:p.getBoundingClientRect()};e.preventDefault();
+});
+document.addEventListener('pointermove',e=>{
+  if(!roomDrag)return;const d=roomDrag,dx=(e.clientX-d.sx)/d.rect.width*100,dy=(e.clientY-d.sy)/d.rect.height*100,sn=v=>Math.round(v*2)/2;
+  if(d.mode==='move'){d.r.x=Math.max(0,Math.min(100-d.r.w,sn(d.ox+dx)));d.r.y=Math.max(0,Math.min(100-d.r.h,sn(d.oy+dy)))}
+  else{d.r.w=Math.max(8,Math.min(100-d.r.x,sn(d.ow+dx)));d.r.h=Math.max(8,Math.min(100-d.r.y,sn(d.oh+dy)))}
+  Object.assign(d.el.style,{left:d.r.x+'%',top:d.r.y+'%',width:d.r.w+'%',height:d.r.h+'%'});
+});
+document.addEventListener('pointerup',()=>{if(roomDrag){roomDrag=null;save()}});
+
+/* ============ Alarmsystem ============ */
+const AL={disarmed:['Unscharf','shield-off-outline','a-disarmed'],armed_home:['Scharf · Zuhause','shield-home','a-armed'],armed_away:['Scharf · Abwesend','shield-lock','a-armed'],armed_night:['Scharf · Nacht','shield-moon','a-armed'],armed_vacation:['Scharf · Urlaub','shield-airplane','a-armed'],armed_custom_bypass:['Scharf · Benutzerdefiniert','shield-check','a-armed'],arming:['Wird scharf geschaltet …','shield-sync','a-pending'],pending:['Eintrittsverzögerung …','shield-alert','a-pending'],disarming:['Wird entschärft …','shield-sync','a-pending'],triggered:['ALARM AUSGELÖST','shield-alert','a-triggered'],unavailable:['Nicht verfügbar','shield-off','']};
+const alarmEntity=()=>cfg.alarm?.entity&&states[cfg.alarm.entity]?cfg.alarm.entity:Object.keys(states).find(i=>dom(i)==='alarm_control_panel');
+const ZDC=['door','window','opening','garage_door','motion','occupancy','smoke','moisture','gas','carbon_monoxide','vibration','tamper','safety'];
+const ZL={door:['Offen','Geschlossen'],window:['Offen','Geschlossen'],opening:['Offen','Geschlossen'],garage_door:['Offen','Geschlossen'],motion:['Bewegung','Ruhig'],occupancy:['Belegt','Frei'],smoke:['RAUCH!','OK'],moisture:['WASSER!','Trocken'],gas:['GAS!','OK'],carbon_monoxide:['CO!','OK'],vibration:['Erschütterung','Ruhig'],tamper:['Sabotage!','OK'],safety:['Gefahr!','OK']};
+const ZALERT=['smoke','moisture','gas','carbon_monoxide','tamper','safety'],ZICON={garage_door:'garage',moisture:'water-alert',gas:'gas-cylinder',carbon_monoxide:'molecule-co',tamper:'shield-alert',vibration:'vibrate',safety:'alert'};
+function zoneIds(){const z=cfg.alarm?.zones;if(z&&z.length)return z.filter(i=>states[i]);return Object.values(states).filter(s=>dom(s.entity_id)==='binary_sensor'&&ZDC.includes(s.attributes.device_class)).map(s=>s.entity_id)}
+const zoneInfo=id=>{const s=states[id],dc=s.attributes.device_class,on=s.state==='on';return{on,dc,name:cfg.names[id]||s.attributes.friendly_name||id,txt:(ZL[dc]||['An','Aus'])[on?0:1],cls:on?(ZALERT.includes(dc)?'alert':'open'):'',icon:ZICON[dc]||DCICON[dc]||'checkbox-blank-circle-outline'}};
+let alog=[];try{alog=JSON.parse(localStorage.getItem('ha-dash-log')||'[]')}catch{}
+function logAlarm(id){
+  const s=states[id];if(!s)return;const prev=lastSt[id];lastSt[id]=s.state;if(prev===undefined||prev===s.state)return;
+  let text,icon,lvl='';
+  if(dom(id)==='alarm_control_panel'){const a=AL[s.state];text=`${s.attributes.friendly_name||'Alarmanlage'}: ${a?a[0]:s.state}`;icon=a?a[1]:'shield';if(s.state==='triggered')lvl='bad'}
+  else{const z=zoneInfo(id);if(!ZDC.includes(z.dc)&&!(cfg.alarm?.zones||[]).includes(id))return;text=`${z.name}: ${z.txt}`;icon=z.icon;if(z.cls==='alert')lvl='bad'}
+  alog.unshift({t:Date.now(),text,icon,lvl});alog=alog.slice(0,60);
+  if(!cfg.demo)try{localStorage.setItem('ha-dash-log',JSON.stringify(alog))}catch{}
+  buildNav();alarmBanner();
+}
+function alarmBanner(){
+  let b=$('#abanner');if(!b){b=document.createElement('div');b.id='abanner';document.body.appendChild(b)}
+  const on=alarmTriggered();b.style.display=on?'flex':'none';if(on)b.innerHTML=`${mdi('shield-alert')} ALARM AUSGELÖST <button onclick="showPage('alarm')">Anzeigen</button>`;
+}
+function renderAlarm(){
+  const el=$('#pg-alarm'),id=alarmEntity(),zs=zoneIds();
+  if(!id&&!zs.length){el.innerHTML=`<div class="empty"><h3>${mdi('shield-off-outline')} Kein Alarmsystem gefunden</h3><p>In Home Assistant wird eine <code>alarm_control_panel</code>-Entität benötigt (z. B. Alarmo, Manual Alarm Panel oder deine Alarmzentrale).</p><button class="btn" onclick="openAlarmCfg()">${mdi('link-variant')} Manuell zuordnen</button></div>`;return}
+  const s=id&&states[id],a=s?(AL[s.state]||[s.state,'shield','']):null,open=zs.map(zoneInfo).filter(z=>z.on&&z.cls==='open'&&z.dc!=='motion'&&z.dc!=='occupancy').length;
+  const mode=(svc,ic,t,cls='')=>`<button class="${cls} ${s&&s.state===svcState(svc)?'cur':''}" onclick="alarmDo('${svc}')">${mdi(ic)}${t}</button>`;
+  el.innerHTML=`<div class="toolbar"><div class="sp"></div>${cfg.demo?`<button class="btn" onclick="demoCall('alarm_control_panel','alarm_trigger','${id}',{})">${mdi('bell-ring')} Alarm testen (Demo)</button>`:''}<button class="btn" onclick="openAlarmCfg()">${mdi('link-variant')} Zuordnen</button></div>
+  <div class="agrid"><div class="card ahero ${a?a[2]:''}">
+    ${s?`<div class="shield">${mdi(a[1])}</div><div class="astate">${a[0]}</div><div class="st">${esc(s.attributes.friendly_name||id)}${open?` · <span style="color:var(--warn)">${open} Zone${open>1?'n':''} offen</span>`:''}</div>
+    <div class="pcode">${'●'.repeat(codeBuf.length)||'&nbsp;'}</div>
+    <div class="pad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button onclick="padKey('${n}')">${n}</button>`).join('')}<button onclick="padKey('C')">${mdi('backspace-outline')}</button><button onclick="padKey('0')">0</button><button onclick="padKey('X')">${mdi('close')}</button></div>
+    <div class="amodes">${mode('alarm_arm_home','shield-home','Zuhause')}${mode('alarm_arm_away','shield-lock','Abwesend')}${mode('alarm_arm_night','shield-moon','Nacht')}</div>
+    <div class="amodes" style="grid-template-columns:1fr">${mode('alarm_disarm','shield-off-outline','Entschärfen','dis')}</div>`
+    :`<div class="shield">${mdi('shield-outline')}</div><div class="astate">Nur Sensor-Überwachung</div><div class="st">Keine Alarmzentrale zugeordnet</div>`}
+  </div><div class="estack">
+    <div class="card"><h4>Zonen & Sensoren · ${zs.length}</h4><div class="zones">${zs.map(i=>{const z=zoneInfo(i);return `<div class="zn ${z.cls}">${mdi(z.icon)}<div>${esc(z.name)}<small>${z.txt}</small></div></div>`}).join('')||'<div class="st">Keine Sensoren gefunden</div>'}</div></div>
+    <div class="card"><h4>Ereignisprotokoll</h4><div class="logl">${alog.map(l=>`<div style="${l.lvl==='bad'?'color:var(--bad)':''}"><time>${new Date(l.t).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}</time>${mdi(l.icon)}<span>${esc(l.text)}</span></div>`).join('')||'<div class="st" style="padding:8px">Noch keine Ereignisse seit dem Öffnen des Dashboards.</div>'}</div></div>
+  </div></div>`;
+}
+const svcState=svc=>({alarm_arm_home:'armed_home',alarm_arm_away:'armed_away',alarm_arm_night:'armed_night',alarm_disarm:'disarmed'}[svc]);
+function padKey(k){codeBuf=k==='C'?codeBuf.slice(0,-1):k==='X'?'':(codeBuf+k).slice(0,10);renderAlarm()}
+function alarmDo(svc){
+  const id=alarmEntity();if(!id)return;const a=states[id].attributes,data={};
+  if(codeBuf)data.code=codeBuf;
+  else if(svc==='alarm_disarm'&&(a.code_format||cfg.demo)){toast('Bitte Code eingeben'+(cfg.demo?' (Demo: 1234)':''));return}
+  else if(svc!=='alarm_disarm'&&a.code_arm_required){toast('Bitte Code eingeben');return}
+  call('alarm_control_panel',svc,id,data);codeBuf='';renderAlarm();
+}
+function openAlarmCfg(){
+  fillEntList();const c=cfg.alarm||{};
+  $('#mAlarmCfgBody').innerHTML=`<h3>Alarmsystem zuordnen</h3><p>Normalerweise wird alles automatisch erkannt. Hier kannst du es überschreiben.</p>
+   <label>Alarm-Entität</label><input type="text" list="dlEnt" id="al-ent" value="${esc(c.entity||'')}" placeholder="alarm_control_panel.haus">
+   <label>Zonen (Komma-getrennte Entitäten, leer = automatisch)</label><input type="text" id="al-zones" value="${esc((c.zones||[]).join(', '))}" placeholder="binary_sensor.haustuer, binary_sensor.fenster_wz">
+   <div class="acts2"><button class="btn primary" onclick="cfg.alarm={entity:$('#al-ent').value.trim(),zones:$('#al-zones').value.split(',').map(x=>x.trim()).filter(Boolean)};save();closeModals();renderAlarm()">Speichern</button><button class="btn" onclick="closeModals()">Abbrechen</button></div>`;
+  $('#mAlarmCfg').classList.add('open');
+}
+
+/* ============ Wandmodus (Raspberry Pi / Kiosk) ============ */
+const KPAGES=[['kiosk','Übersicht'],['energy','Energie'],['cams','Kameras'],['rooms','Räume'],['alarm','Alarm']];
+const kOn=()=>document.body.classList.contains('kiosk');
+const KW={sunny:['weather-sunny','Sonnig'],'clear-night':['weather-night','Klar'],cloudy:['weather-cloudy','Bewölkt'],partlycloudy:['weather-partly-cloudy','Teils bewölkt'],rainy:['weather-rainy','Regen'],pouring:['weather-pouring','Starkregen'],snowy:['weather-snowy','Schnee'],fog:['weather-fog','Nebel'],lightning:['weather-lightning','Gewitter'],windy:['weather-windy','Windig'],hail:['weather-hail','Hagel']};
+{const n=Date.now();
+ DEMO['sun.sun']=mk('sun.sun','above_horizon',{friendly_name:'Sonne',next_setting:new Date(n+3.2*36e5).toISOString(),next_rising:new Date(n+14*36e5).toISOString()});
+ DEMO['sensor.m340i_kilometerstand']=mk('sensor.m340i_kilometerstand','23847',{friendly_name:'M340i Kilometerstand',unit_of_measurement:'km',device_class:'distance'});
+ DEMO['sensor.m340i_tank']=mk('sensor.m340i_tank','62',{friendly_name:'M340i Tankinhalt',unit_of_measurement:'%'});
+ DEMO['sensor.m340i_reichweite']=mk('sensor.m340i_reichweite','418',{friendly_name:'M340i Reichweite',unit_of_measurement:'km',device_class:'distance'});
+ DEMO['camera.carport']=mk('camera.carport','idle',{friendly_name:'Carport'});
+ DEMO['person.anna']=mk('person.anna','not_home',{friendly_name:'Anna'});
+ Object.assign(DEMO['weather.zuhause'].attributes,{humidity:68,wind_speed:14});}
+const CARSVG=`<svg class="kcarsvg" viewBox="0 0 300 108">
+<defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8e949d"/><stop offset=".4" stop-color="#5a5f67"/><stop offset="1" stop-color="#2a2d32"/></linearGradient>
+<linearGradient id="gl" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".6"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+<linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a3d50"/><stop offset="1" stop-color="#0a1016"/></linearGradient>
+<radialGradient id="hg"><stop offset="0" stop-color="#eaf5ff"/><stop offset="1" stop-color="#eaf5ff" stop-opacity="0"/></radialGradient>
+<radialGradient id="tg"><stop offset="0" stop-color="#ff4040"/><stop offset="1" stop-color="#ff4040" stop-opacity="0"/></radialGradient>
+<clipPath id="cc"><path d="M14 90 L14 66 C14 61 17 59 22 58 L88 49 C100 38 112 27 130 22 L232 22 C244 22 250 28 254 36 L268 54 C274 58 276 62 276 68 L276 90 Z"/></clipPath></defs>
+<ellipse cx="145" cy="100" rx="140" ry="5" fill="rgba(0,0,0,.55)"/>
+<path d="M14 90 L14 66 C14 61 17 59 22 58 L88 49 C100 38 112 27 130 22 L232 22 C244 22 250 28 254 36 L268 54 C274 58 276 62 276 68 L276 90 Z" fill="url(#cg)" stroke="#a0a6ae" stroke-width=".8"/>
+<path d="M96 47 C106 36 116 28 130 25 L148 25 L148 47 Z M153 25 L200 25 L200 47 L153 47 Z M205 25 L233 25 C240 25 244 29 247 35 L254 47 L205 47 Z" fill="url(#wg)" stroke="#a0a6ae" stroke-width=".6"/>
+<path d="M134 20.6 H232" stroke="#c8ccd2" stroke-width="1.8" stroke-linecap="round"/>
+<path d="M150.5 47 V84 M202.5 47 V84" stroke="rgba(0,0,0,.45)" stroke-width="1"/><path d="M138 54 h8 M190 54 h8" stroke="#bcc0c7" stroke-width="1.8" stroke-linecap="round"/>
+<path d="M28 85 H262" stroke="#aab0b8" stroke-width=".9" opacity=".55"/>
+<path d="M14 66 h12 v9 h-12z" fill="#0d0e10"/><path d="M15 68.5 h10 M15 72 h10" stroke="#3a3d42" stroke-width=".9"/>
+<g clip-path="url(#cc)"><rect class="glint" x="0" y="14" width="42" height="80" fill="url(#gl)"/></g>
+<ellipse class="hl" cx="17" cy="62" rx="17" ry="8" fill="url(#hg)"/><path d="M15 60 L31 56.5 L31 61.5 L15 65Z" fill="#f4faff"/>
+<ellipse cx="274" cy="62" rx="9" ry="10" fill="url(#tg)" opacity=".85"/><path d="M269 55 L276 63 L270 69Z" fill="#ef4444"/>
+<g><circle cx="58" cy="81" r="21" fill="#0f1114"/><circle cx="58" cy="81" r="19" fill="#1b1d21"/><g class="whl" style="transform-origin:58px 81px"><circle cx="58" cy="81" r="13" fill="#b9bec6"/><path d="M58 69 V93 M46 81 H70 M49.5 72.5 L66.5 89.5 M66.5 72.5 L49.5 89.5" stroke="#555a62" stroke-width="2"/></g><circle cx="58" cy="81" r="3.2" fill="#2a2d32"/></g>
+<g><circle cx="216" cy="81" r="21" fill="#0f1114"/><circle cx="216" cy="81" r="19" fill="#1b1d21"/><g class="whl" style="transform-origin:216px 81px"><circle cx="216" cy="81" r="13" fill="#b9bec6"/><path d="M216 69 V93 M204 81 H228 M207.5 72.5 L224.5 89.5 M224.5 72.5 L207.5 89.5" stroke="#555a62" stroke-width="2"/></g><circle cx="216" cy="81" r="3.2" fill="#2a2d32"/></g>
+</svg>`;
+const KSKEL=`<div class="kx">
+ <div class="kl">
+  <div class="kcard" style="--i:0"><div id="kclk"><span id="khm"></span><span id="kss"></span></div><div id="kdate"></div><div id="kgreet"></div></div>
+  <div class="kcard" id="kwc" style="--i:1"><i id="kwi" class="mdi"></i><div><b id="kwt"></b><small id="kws"></small><small id="kwx"></small></div></div>
+  <div class="kcard" style="--i:2"><h5>${mdi('account-group')} Zuhause</h5><div id="kp"></div><div id="ksun" class="ksub"></div></div>
+  <div class="kcard kcar" id="kcar" style="--i:3"><h5>${mdi('car-estate')} BMW M340i xDrive Touring <em>Dravitgrau</em></h5><div class="kcarimg" id="kcarimgw" style="display:none"><div class="kcarbox"><img id="kcarimg" alt=""></div></div>${CARSVG}
+   <div class="kcarinfo"><div><small>Kilometerstand</small><b id="kc-odo">–</b></div><div><small>Reichweite</small><b id="kc-rng">–</b></div></div>
+   <div class="kfuel" id="kfuel"><i class="mdi mdi-gas-station"></i><div class="kbar"><i id="kc-fbar" style="width:0"></i></div><b id="kc-fp">–</b><small id="kc-fl"></small></div></div>
+ </div>
+ <div class="kc2"><div class="kcard" id="ken" style="--i:3"><h5>${mdi('lightning-bolt')} Energie live</h5>
+   <div class="ke4">
+    <div class="ks" style="--c:#fbbf24"><i class="mdi mdi-white-balance-sunny spin"></i><b id="ke-pv">–</b><small>Solar</small></div>
+    <div class="ks" style="--c:#a78bfa"><i class="mdi mdi-home-lightning-bolt-outline"></i><b id="ke-h">–</b><small>Verbrauch</small></div>
+    <div class="ks" id="ke-gc" style="--c:#38bdf8"><i class="mdi mdi-transmission-tower"></i><b id="ke-g">–</b><small id="ke-gl">Netz</small></div>
+    <div class="ks" style="--c:#34d399"><i class="mdi mdi-leaf"></i><b id="ke-a">–</b><small>Autarkie</small></div>
+   </div>
+   <div id="kbats"></div><div id="k-chart"></div></div></div>
+ <div class="kr3">
+  <div class="kcard" id="kal" style="--i:4"><div class="shield"><i id="kal-i" class="mdi"></i></div><div><b id="kal-t"></b><small id="kal-n"></small></div></div>
+  <div class="kcard kcams" id="kcams" style="--i:5"></div>
+  <div class="kcard" id="kzn" style="--i:6"></div>
+  <div class="kcard kq" style="--i:7"><div class="kqi"><i class="mdi mdi-lightbulb-group-outline"></i><b id="kq-l">0</b><small>Lichter an</small></div><div class="kqi"><i class="mdi mdi-fire"></i><b id="kq-h">0</b><small>heizen</small></div><div class="kqi"><i class="mdi mdi-power-plug-outline"></i><b id="kq-s">0</b><small>Geräte an</small></div></div>
+ </div></div>
+ <div class="kbottom"><div id="krooms"></div><div class="ktick"><div id="ktickin"></div></div></div>`;
+/* Fahrzeug: manuell zugeordnete Entitäten, sonst Auto-Erkennung (z. B. BMW Connected Drive) */
+function carCfg(){
+  if(cfg.demo)return{odo:'sensor.m340i_kilometerstand',fuel:'sensor.m340i_tank',range:'sensor.m340i_reichweite'};
+  const c=cfg.car||{},ids=Object.keys(states).filter(i=>dom(i)==='sensor'),pref=ids.filter(i=>/bmw|m340|mini/i.test(i)),pick=re=>(pref.find(i=>re.test(i))||ids.find(i=>re.test(i)&&/bmw|m340/i.test(i)))||'';
+  return{odo:c.odo||pick(/mileage|odometer|kilometerstand|km_stand/i),fuel:c.fuel||pick(/fuel.*(percent|prozent|level)|tank.*(percent|prozent|stand|level)|remaining_fuel/i),range:c.range||pick(/range|reichweite/i)};
+}
+/* Fahrzeugfoto: bmw.jpg/.png/.webp neben dem Dashboard oder in den Einstellungen gewählt; weißer Hintergrund wird freigestellt */
+function cutout(img){
+  const w=Math.min(900,img.naturalWidth),h=Math.round(img.naturalHeight*w/img.naturalWidth),c=document.createElement('canvas');c.width=w;c.height=h;
+  const x=c.getContext('2d');x.drawImage(img,0,0,w,h);
+  const d=x.getImageData(0,0,w,h),p=d.data,seen=new Uint8Array(w*h),st=[];
+  const bg=i=>p[i*4]>228&&p[i*4+1]>228&&p[i*4+2]>228;
+  for(let i=0;i<w;i++)st.push(i,(h-1)*w+i);for(let j=0;j<h;j++)st.push(j*w,j*w+w-1);
+  while(st.length){const i=st.pop();if(seen[i]||!bg(i))continue;seen[i]=1;p[i*4+3]=0;const px=i%w,py=(i/w)|0;if(px>0)st.push(i-1);if(px<w-1)st.push(i+1);if(py>0)st.push(i-w);if(py<h-1)st.push(i+w)}
+  for(let i=0;i<w*h;i++){if(seen[i])continue;const px=i%w,py=(i/w)|0;if((px>0&&seen[i-1])||(px<w-1&&seen[i+1])||(py>0&&seen[i-w])||(py<h-1&&seen[i+w]))p[i*4+3]=Math.min(p[i*4+3],150)}
+  x.putImageData(d,0,0);return c.toDataURL('image/png');
+}
+let carImgState=0;
+function kCarImage(force){
+  if(carImgState&&!force)return;carImgState=1;
+  const list=[cfg.carImg,'bmw.jpg','bmw.png','bmw.webp'].filter(Boolean);
+  const show=src=>{$('#kcarimg').src=src;$('#kcarimgw').style.display='';const s=document.querySelector('#kcar .kcarsvg');if(s)s.style.display='none'};
+  const next=()=>{const u=list.shift();if(!u){carImgState=2;return}
+    const im=new Image();im.onload=()=>{try{show(cutout(im))}catch{show(im.src);$('#kcarimgw').classList.add('plate')}carImgState=3};im.onerror=next;im.src=u};
+  next();
+}
+document.body.insertAdjacentHTML('beforeend','<input type="file" id="carFile" accept="image/*" style="display:none">');
+$('#carFile').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;const im=new Image();
+  im.onload=()=>{const k=Math.min(1,1000/im.width),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+    try{cfg.carImg=c.toDataURL('image/jpeg',.9);save();toast('Fahrzeugfoto gespeichert')}catch{toast('Bild zu groß für den Browser-Speicher')}kCarImage(true)};
+  im.src=URL.createObjectURL(f);e.target.value=''});
+function renderKiosk(){const el=$('#pg-kiosk');if(!el)return;if(!el.dataset.built){el.dataset.built=1;el.innerHTML=KSKEL;kCarImage()}updateKiosk();kClock();kFit();setTimeout(kFit,1200)}
+function kNum(id,to,fmt){
+  const el=$('#'+id);if(!el)return;const from=el._v??to;el._v=to;if(el._raf)cancelAnimationFrame(el._raf);
+  const t0=performance.now(),step=t=>{const k=Math.min(1,(t-t0)/900),e=1-Math.pow(1-k,3);el.textContent=fmt(from+(to-from)*e);if(k<1)el._raf=requestAnimationFrame(step)};step(t0);
+}
+const setH=(el,h)=>{if(el&&el.dataset.h!==h){el.dataset.h=h;el.innerHTML=h}};
+const hhmm=s=>{const d=new Date(s);return isNaN(d)?'':d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})};
+function updateKiosk(){
+  if(!$('#kclk'))return;
+  const v=energyVals(),e=eCfg(),hasE=!!(e.pv||e.grid||e.house||e.batt),all=Object.values(states),T=(id,t)=>{const x=$('#'+id);if(x)x.textContent=t};
+  /* Wetter */
+  const w=all.find(x=>dom(x.entity_id)==='weather');$('#kwc').style.display=w?'':'none';
+  if(w){const k=KW[w.state]||['weather-partly-cloudy',w.state];$('#kwi').className='mdi mdi-'+k[0];T('kwt',(w.attributes.temperature??'–')+(w.attributes.temperature_unit||'°C'));T('kws',k[1]);
+    T('kwx',[w.attributes.humidity!=null?w.attributes.humidity+' % Luftfeuchte':'',w.attributes.wind_speed!=null?Math.round(w.attributes.wind_speed)+' km/h Wind':''].filter(Boolean).join(' · '))}
+  /* Personen & Sonne */
+  setH($('#kp'),all.filter(x=>dom(x.entity_id)==='person').map(p=>{const n=p.attributes.friendly_name||p.entity_id,h=p.state==='home';return `<span class="kav ${h?'home':''}"><i>${esc(n[0]||'?')}</i>${esc(n)}<small style="color:var(--mut)">${h?'zuhause':'unterwegs'}</small></span>`}).join('')||'<span class="ksub">Keine Personen</span>');
+  const sun=states['sun.sun'];$('#ksun').style.display=sun?'':'none';
+  if(sun){const up=sun.state==='above_horizon';setH($('#ksun'),`${mdi(up?'weather-sunset-down':'weather-sunset-up')} ${up?'Sonnenuntergang':'Sonnenaufgang'} um <b style="color:var(--txt)">${hhmm(up?sun.attributes.next_setting:sun.attributes.next_rising)}</b>`)}
+  /* Energie */
+  $('#ken').style.display=hasE?'':'none';
+  if(hasE){
+    kNum('ke-pv',v.pv,fw);kNum('ke-h',v.house,fw);kNum('ke-g',Math.abs(v.grid),fw);kNum('ke-a',v.aut,x=>Math.round(x)+' %');
+    T('ke-gl',v.grid>=50?'Netzbezug':v.grid<=-50?'Einspeisung':'Netz');$('#ke-gc').style.setProperty('--c',v.grid<=-50?'#34d399':v.grid>=50?'#f87171':'#38bdf8');
+    setH($('#kbats'),v.bats.map(b=>{const p=b.p||0,c=b.soc==null?'#8b90a3':b.soc<20?'#f87171':b.soc<45?'#fbbf24':'#34d399';
+      return `<div class="kb"><span>${mdi(battIcon(b.soc,p>=50))} ${esc(b.name.replace(/ Ladestand| SOC| soc/i,''))}</span><div class="kbar ${p>=50?'chg':''}"><i style="width:${b.soc||0}%;background:${c}"></i></div><b>${b.soc!=null?Math.round(b.soc)+' %':'–'}</b><small>${p>=30?'↑ '+fw(p):p<=-30?'↓ '+fw(-p):'bereit'}</small></div>`}).join(''));
+    loadEHist().then(()=>drawChart('k-chart'));
+  }
+  /* Alarm */
+  const id=alarmEntity(),s=id&&states[id],a=s?(AL[s.state]||[s.state,'shield','']):null;$('#kal').style.display=a?'':'none';
+  if(a){$('#kal').className='kcard '+a[2];$('#kal-i').className='mdi mdi-'+a[1];T('kal-t',a[0]);T('kal-n',s.attributes.friendly_name||'Alarmanlage')}
+  /* Kameras (6er-Raster) */
+  const cams=camList().slice(0,6),kc=$('#kcams');kc.style.display=cams.length?'':'none';
+  const ch=cams.map(c=>`<div class="kcell"><img data-cam="${c}" alt=""><span class="rec live">LIVE</span><b>${esc(camName(c))}</b></div>`).join('');
+  if(kc.dataset.h!==ch){kc.dataset.h=ch;kc.innerHTML=ch;kc.querySelectorAll('img').forEach(refreshCam)}
+  /* Zonen */
+  const zs=zoneIds().map(zoneInfo),op=zs.filter(z=>z.cls&&z.dc!=='motion'&&z.dc!=='occupancy');
+  $('#kzn').style.display=zs.length?'':'none';
+  setH($('#kzn'),`<h5>${mdi('shield-check-outline')} Türen & Fenster</h5>`+(op.length?op.slice(0,4).map(z=>`<div class="kzi">${mdi(z.icon)}<span>${esc(z.name)}</span><small>${z.txt}</small></div>`).join(''):`<div class="kzok">${mdi('check-circle-outline')} Alles geschlossen <small>${zs.length} Sensoren</small></div>`));
+  /* Kurzstatistik */
+  const R=roomsRef(),heat=R.filter(isHeating).length+(R.length?0:all.filter(x=>dom(x.entity_id)==='climate'&&x.attributes.hvac_action==='heating').length);
+  T('kq-l',all.filter(x=>dom(x.entity_id)==='light'&&x.state==='on').length);T('kq-h',heat);T('kq-s',all.filter(x=>['switch','input_boolean'].includes(dom(x.entity_id))&&x.state==='on').length);
+  /* Räume */
+  const rm=R.map(r=>[r,roomTemp(r)]).filter(x=>x[1]!=null);
+  const kr=$('#krooms'),key=rm.map(x=>x[0].id).join(',');
+  if(kr.dataset.k!==key){kr.dataset.k=key;kr.dataset.u=0;kr.innerHTML=rm.map(([r],i)=>`<div class="kro" data-r="${r.id}" style="animation-delay:${i*70}ms"><small>${esc(r.name)}</small><b></b><i class="mdi mdi-fire flame" style="display:none"></i></div>`).join('')}
+  if(Date.now()-kr.dataset.u>60000){kr.dataset.u=Date.now();rm.forEach(([r,t])=>{const el=kr.querySelector(`[data-r="${r.id}"]`);if(!el)return;el.style.setProperty('--c',tColor(t));el.style.setProperty('--p',Math.max(4,Math.min(100,(t-14)/16*100))+'%');el.querySelector('b').textContent=t.toFixed(1)+'°';el.querySelector('.flame').style.display=isHeating(r)?'':'none'})}
+  $('#krooms').style.display=rm.length?'':'none';
+  /* Fahrzeug */
+  const car=carCfg(),kcar=$('#kcar');kcar.style.display=(car.odo||car.fuel||car.range)?'':'none';
+  if(kcar.style.display===''){
+    const cv=k=>{const s=states[car[k]];if(!s)return null;let n=num(s.state);if(n==null)return null;const u=(s.attributes.unit_of_measurement||'').toLowerCase();if(u==='mi')n*=1.609344;return{n,u}};
+    const o=cv('odo'),r=cv('range'),f=cv('fuel');
+    if(o)kNum('kc-odo',o.n,x=>Math.round(x).toLocaleString('de-DE')+' km');else T('kc-odo','–');
+    if(r)kNum('kc-rng',r.n,x=>Math.round(x)+' km');else T('kc-rng','–');
+    if(f){const pct=f.u==='l'?f.n/59*100:f.n,col=pct<15?'#f87171':pct<30?'#fbbf24':'#34d399';
+      $('#kc-fbar').style.width=Math.max(2,Math.min(100,pct))+'%';$('#kc-fbar').style.background=col;$('#kfuel').style.setProperty('--c',col);$('#kfuel').classList.toggle('low',pct<15);
+      kNum('kc-fp',pct,x=>Math.round(x)+' %');T('kc-fl','≈ '+Math.round(pct*.59)+' l')}
+    else{T('kc-fp','–');T('kc-fl','')}
+  }
+  /* Laufband */
+  const items=[...alog.slice(0,5).map(l=>`<span><b>${new Date(l.t).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}</b> ${esc(l.text)}</span>`)];
+  if(hasE){if(v.day!=null)items.push(`<span>${mdi('solar-power')} PV heute <b>${v.day.toFixed(1)} kWh</b></span>`);items.push(`<span>${mdi('leaf')} Autarkie <b>${Math.round(v.aut)} %</b></span>`)}
+  if(rm.length){const avg=rm.reduce((x,y)=>x+y[1],0)/rm.length;items.push(`<span>${mdi('thermometer')} Ø Raumtemperatur <b>${avg.toFixed(1)}°</b></span>`)}
+  if(!items.length)items.push('<span>Alles ruhig – willkommen zuhause</span>');
+  const half=items.join('<span>◆</span>'),tk=$('#ktickin');
+  if(tk&&tk.dataset.h!==half){tk.dataset.h=half;tk.innerHTML=`<div style="display:inline-flex">${half}<span>◆</span></div><div style="display:inline-flex">${half}<span>◆</span></div>`;tk.style.animationDuration=Math.max(30,half.length/9)+'s'}
+}
+function kClock(){
+  const n=new Date(),h=$('#khm');if(!h)return;const m=String(n.getHours()).padStart(2,'0')+String(n.getMinutes()).padStart(2,'0');
+  if(h.dataset.m!==m){h.dataset.m=m;h.innerHTML=m.slice(0,2)+'<span class="col">:</span>'+m.slice(2);
+    $('#kdate').textContent=n.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
+    const hr=n.getHours();$('#kgreet').textContent=hr<5?'Gute Nacht':hr<11?'Guten Morgen':hr<17?'Guten Tag':hr<22?'Guten Abend':'Gute Nacht'}
+  $('#kss').textContent=String(n.getSeconds()).padStart(2,'0');
+}
+function kFit(){
+  const w=$('.wrap');if(!w)return;
+  if(!kOn()||page!=='kiosk'){w.style.zoom='';return}
+  w.style.zoom=1;const need=$('.kx').offsetHeight+$('.kbottom').offsetHeight+18+34;
+  w.style.zoom=Math.max(.5,Math.min(1.4,innerHeight/need)).toFixed(3);
+}
+window.addEventListener('resize',kFit);
+setInterval(()=>{if(kOn()&&page==='kiosk'){updateKiosk();kFit()}},4000);
+function kPages(){if(!cfg.kioskRotate)return['kiosk'];const p=(cfg.kioskPages||KPAGES.map(x=>x[0])).filter(x=>x!=='energy'||Object.keys(eCfg()).some(k=>eCfg()[k])).filter(x=>x!=='alarm'||alarmEntity()||zoneIds().length).filter(x=>x!=='cams'||camList().length);return p.length?p:['kiosk']}
+function startKiosk(){
+  if(kOn())return;document.body.classList.add('kiosk');document.body.classList.remove('edit');
+  try{history.replaceState(null,'','#kiosk')}catch{}
+  kioskIdx=0;kStep(0);
+  if(cfg.kioskRotate)kioskT=setInterval(()=>kStep(1),(cfg.kioskSec||15)*1000);
+  setInterval(kClock,1000);
+  const wl=()=>{try{navigator.wakeLock?.request('screen').catch(()=>{})}catch{}};wl();
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)wl()});
+  closeModals();
+}
+function kStep(d){
+  const l=kPages();kioskIdx=(kioskIdx+d)%l.length;const p=l[kioskIdx],w=$('.wrap');
+  w.style.opacity=0;setTimeout(()=>{showPage(p);w.style.opacity=1;$('#ktitle').textContent=(KPAGES.find(x=>x[0]===p)||[0,''])[1];const b=$('#kbar');b.style.display=cfg.kioskRotate?'':'none';b.style.transition='none';b.style.width='0';requestAnimationFrame(()=>requestAnimationFrame(()=>{b.style.transition=`width ${cfg.kioskSec||15}s linear`;b.style.width='100%'}))},350);
+}
+function stopKiosk(){clearInterval(kioskT);kioskT=null;document.body.classList.remove('kiosk');document.body.classList.remove('night');$('.wrap').style.opacity=1;showPage('home')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&kOn())stopKiosk()});
+function renderKcfg(){
+  fillEntList();
+  const pg=cfg.kioskPages||KPAGES.map(x=>x[0]);
+  $('#kcfg').innerHTML=`<label style="text-transform:none;display:flex;gap:8px;align-items:center;margin:0 0 10px;font-size:13px"><input type="checkbox" id="iKrot" ${cfg.kioskRotate?'checked':''} onchange="saveKcfg()"> Ansichten automatisch wechseln (Karussell) – sonst nur Startbildschirm mit 6 Kameras</label><div class="sw-acc" style="flex-wrap:wrap;gap:8px;margin-bottom:10px">${KPAGES.map(([id,t])=>`<label style="margin:0;display:flex;gap:6px;align-items:center;text-transform:none;font-size:13px"><input type="checkbox" ${pg.includes(id)?'checked':''} onchange="saveKcfg()" data-kp="${id}"> ${t}</label>`).join('')}</div>
+    <label>Sekunden pro Ansicht</label><input type="text" id="iKsec" value="${cfg.kioskSec||15}" onchange="saveKcfg()" style="width:100px">
+    <label>Fahrzeug – BMW M340i (leer = automatisch erkennen)</label>
+    <input type="text" list="dlEnt" id="iCo" value="${esc((cfg.car||{}).odo||'')}" placeholder="Kilometerstand: sensor.bmw_mileage" onchange="saveKcfg()" style="margin-bottom:6px">
+    <input type="text" list="dlEnt" id="iCf" value="${esc((cfg.car||{}).fuel||'')}" placeholder="Tank (% oder Liter): sensor.bmw_remaining_fuel_percent" onchange="saveKcfg()" style="margin-bottom:6px">
+    <input type="text" list="dlEnt" id="iCr" value="${esc((cfg.car||{}).range||'')}" placeholder="Reichweite: sensor.bmw_remaining_range_total" onchange="saveKcfg()">
+    <div class="acts2" style="margin-top:8px"><button class="btn" onclick="$('#carFile').click()">${mdi('image-plus')} Fahrzeugfoto wählen</button>${cfg.carImg?`<button class="btn" onclick="cfg.carImg='';save();location.reload()">${mdi('image-remove')} Foto entfernen</button>`:''}</div>
+    <div class="acts2" style="margin-top:12px"><button class="btn primary" onclick="startKiosk()">${mdi('monitor-dashboard')} Wandmodus starten</button></div>
+    <p style="margin:10px 0 0">Auf dem Pi einmalig verbinden, dann dauerhaft mit <code>chromium-browser --kiosk "file:///home/pi/dashboard.html#kiosk"</code> starten. Beenden mit <b>Esc</b>.</p>`;
+}
+function saveKcfg(){cfg.car={odo:$('#iCo').value.trim(),fuel:$('#iCf').value.trim(),range:$('#iCr').value.trim()};cfg.kioskRotate=$('#iKrot').checked;cfg.kioskPages=[...document.querySelectorAll('[data-kp]:checked')].map(x=>x.dataset.kp);cfg.kioskSec=Math.max(5,+$('#iKsec').value||15);save();if(kioskT){clearInterval(kioskT);kioskT=setInterval(()=>kStep(1),cfg.kioskSec*1000)}}
+document.head.insertAdjacentHTML('beforeend',`<style>
+#abanner{position:fixed;top:0;left:0;right:0;z-index:80;background:var(--bad);color:#fff;font-weight:700;letter-spacing:.08em;padding:10px;justify-content:center;align-items:center;gap:14px;animation:pulse 1s infinite}
+#abanner button{background:rgba(0,0,0,.35);padding:5px 12px;border-radius:9px;color:#fff}
+#ktitle,#kbar,#kexit{display:none}
+body.kiosk{cursor:none;overflow:hidden}
+body.kiosk header,body.kiosk nav,body.kiosk .bar>*:not(#status){display:none!important}
+body.kiosk .bar{position:fixed;bottom:12px;right:18px;margin:0;z-index:30}
+body.kiosk .wrap{pointer-events:none;transition:opacity .35s;padding-top:54px;max-width:none;height:100vh;overflow:hidden}
+body.kiosk #ktitle{display:block;position:fixed;top:14px;left:28px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);z-index:30}
+body.kiosk #kbar{display:block;position:fixed;top:0;left:0;height:3px;background:var(--accent);z-index:30;width:0}
+body.kiosk #kexit{display:block;position:fixed;top:0;right:0;width:64px;height:64px;z-index:90}
+body.kiosk.night{filter:brightness(.4)}
+body.kiosk .grid.cams,body.kiosk .mv{pointer-events:none}
+body.kiosk .toolbar,body.kiosk .tile .ed{display:none}
+</style>`);
+document.head.insertAdjacentHTML('beforeend',`<style>
+body.kiosk::before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;filter:blur(30px);animation:aurora 40s ease-in-out infinite alternate;
+ background:radial-gradient(40vmax 40vmax at 20% 30%,color-mix(in srgb,var(--accent) 34%,transparent),transparent 70%),radial-gradient(35vmax 35vmax at 80% 70%,rgba(56,189,248,.22),transparent 70%),radial-gradient(30vmax 30vmax at 60% 10%,rgba(236,72,153,.16),transparent 70%)}
+@keyframes aurora{0%{transform:translate(0,0) rotate(0)}100%{transform:translate(6%,-4%) rotate(8deg) scale(1.1)}}
+.kx{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.6fr) minmax(0,1fr);gap:18px;align-items:start}
+.kl,.kc2,.kr3{display:grid;gap:18px;align-content:start}
+.kcard{padding:clamp(14px,1.8vh,22px);border-radius:26px;background:linear-gradient(160deg,rgba(255,255,255,.075),rgba(255,255,255,.025));border:1px solid var(--line);backdrop-filter:blur(18px);animation:kin .9s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0)*110ms)}
+@keyframes kin{from{opacity:0;transform:translateY(26px) scale(.97)}to{opacity:1;transform:none}}
+.kcard h5{margin:0 0 12px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);font-weight:600;display:flex;gap:8px;align-items:center}.kcard h5 i{color:var(--accent);font-size:17px}
+#kclk{font-size:clamp(70px,13vh,180px);font-weight:200;letter-spacing:-.04em;line-height:1;font-variant-numeric:tabular-nums;display:flex;align-items:flex-start;gap:10px}
+#kclk .col{animation:blink 1s steps(2,start) infinite;margin:0 .02em}@keyframes blink{50%{opacity:.15}}
+#kss{font-size:.28em;color:var(--accent);margin-top:.4em;font-weight:400}
+#kdate{font-size:clamp(16px,2.6vh,28px);color:var(--mut);margin-top:6px}
+#kgreet{font-size:clamp(18px,3vh,32px);margin-top:8px;background:linear-gradient(90deg,var(--accent),#38bdf8);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:600}
+#kwc{display:flex;gap:18px;align-items:center}#kwc>i{font-size:clamp(48px,8vh,84px);color:#fbbf24;filter:drop-shadow(0 0 18px rgba(251,191,36,.5));animation:float 5s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-7px)}}
+#kwc b{font-size:clamp(30px,5.4vh,58px);font-weight:300;display:block;line-height:1}#kwc small{color:var(--mut);display:block;margin-top:5px;font-size:14px}
+.kav{display:inline-flex;align-items:center;gap:8px;padding:6px 14px 6px 6px;border-radius:99px;background:rgba(255,255,255,.05);border:1px solid var(--line);margin:0 8px 8px 0;font-size:15px}
+.kav i{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-weight:700;background:var(--mut);color:#0b0d14}
+.kav.home i{background:var(--ok);box-shadow:0 0 14px var(--ok)}
+.ksub{color:var(--mut);font-size:14px;margin-top:6px;display:flex;gap:8px;align-items:center}.ksub i{color:#fbbf24;font-size:20px}
+.ke4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.ks{--c:var(--accent);padding:14px;border-radius:20px;background:color-mix(in srgb,var(--c) 10%,rgba(255,255,255,.03));border:1px solid color-mix(in srgb,var(--c) 35%,transparent);display:flex;flex-direction:column;gap:2px;animation:glowp 4s ease-in-out infinite;transition:background .6s,border-color .6s}
+@keyframes glowp{50%{box-shadow:0 0 28px -6px var(--c)}}
+.ks i{font-size:26px;color:var(--c);filter:drop-shadow(0 0 8px var(--c));width:fit-content}.ks b{font-size:clamp(20px,3.4vh,36px);font-weight:500;font-variant-numeric:tabular-nums}.ks small{color:var(--mut);font-size:12.5px}
+.ks i.spin{animation:spin 14s linear infinite}
+.kb{display:grid;grid-template-columns:140px 1fr 56px 84px;gap:12px;align-items:center;margin:9px 0;font-size:14px}
+.kb b{font-weight:500;text-align:right}.kb small{color:var(--mut);font-size:12.5px}
+.kbar{position:relative;height:14px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden}.kbar i{display:block;height:100%;border-radius:9px;transition:width 1s}
+.kbar.chg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);background-size:90px 100%;background-repeat:no-repeat;animation:shim 1.6s linear infinite}
+@keyframes shim{from{background-position:-90px 0}to{background-position:calc(100% + 90px) 0}}
+#k-chart{margin-top:10px}#k-chart svg{width:100%;height:auto;max-height:24vh}
+#kal{display:flex;gap:16px;align-items:center}#kal .shield{width:84px;height:84px;font-size:42px;margin:0;flex:none}
+#kal b{font-size:clamp(18px,2.8vh,28px);display:block}#kal small{color:var(--mut)}
+#kal.a-triggered{background:var(--bad);animation:pulse .6s infinite}#kal.a-triggered small{color:#fff}
+.kcamc{padding:0;overflow:hidden}.kview{position:relative;aspect-ratio:16/9;background:#000}
+.kview img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .35s}
+.kview::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.14) 0 2px,transparent 2px 4px),linear-gradient(180deg,rgba(0,0,0,.45),transparent 30%,transparent 70%,rgba(0,0,0,.6));pointer-events:none}
+.kview .rec{position:absolute;top:10px;left:10px;z-index:2}.kview b{position:absolute;left:14px;bottom:10px;z-index:2;text-shadow:0 1px 6px #000;font-size:15px}
+.kzi{display:flex;gap:10px;align-items:center;padding:8px 0;font-size:15px;border-bottom:1px solid var(--line)}.kzi i{color:var(--warn);font-size:20px;animation:pulse 1.4s infinite}.kzi small{margin-left:auto;color:var(--warn)}
+.kzok{display:flex;gap:12px;align-items:center;color:var(--ok);font-size:19px}.kzok i{font-size:28px;filter:drop-shadow(0 0 8px var(--ok))}.kzok small{color:var(--mut);margin-left:auto;font-size:12.5px}
+.kq{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}.kqi i{font-size:26px;color:var(--accent)}.kqi b{display:block;font-size:28px;font-weight:400}.kqi small{color:var(--mut);font-size:12px}
+.flame{color:#fb923c;animation:flick 1.2s infinite}@keyframes flick{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.7;transform:scale(1.18)}}
+.kbottom{margin-top:18px;display:grid;gap:12px}
+#krooms{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px}
+.kro{position:relative;padding:10px 12px 12px;border-radius:16px;background:color-mix(in srgb,var(--c) 14%,rgba(255,255,255,.03));border:1px solid color-mix(in srgb,var(--c) 45%,transparent);overflow:hidden;animation:kin .8s both}
+.kro small{display:block;color:var(--mut);font-size:12px}.kro b{font-size:24px;font-weight:300}
+.kro::after{content:"";position:absolute;left:0;bottom:0;height:3px;width:var(--p);background:var(--c);box-shadow:0 0 10px var(--c)}.kro .flame{position:absolute;top:10px;right:12px}
+.ktick{overflow:hidden;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line);padding:10px 0;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+#ktickin{display:inline-flex;white-space:nowrap;animation:marq 60s linear infinite}#ktickin span{padding:0 26px;color:var(--mut);font-size:15px}#ktickin span b{color:var(--txt);font-weight:500}#ktickin i{color:var(--accent)}
+@keyframes marq{to{transform:translateX(-50%)}}
+.kcar{display:flex;flex-direction:column;gap:6px;justify-content:space-between;overflow:hidden}
+.kcar h5{margin:0;white-space:nowrap}.kcar h5 em{font-style:normal;margin-left:auto;font-size:11px;letter-spacing:.04em;padding:3px 10px;border-radius:99px;background:linear-gradient(135deg,#7a8089,#3a3d43);color:#eceef2;text-transform:none;font-weight:500}
+.kcarsvg{width:100%;height:auto;max-height:17vh;flex:1;min-height:0;filter:drop-shadow(0 12px 16px rgba(0,0,0,.5))}
+.kcarinfo{display:grid;grid-template-columns:1fr 1fr;gap:10px}.kcarinfo small{display:block;color:var(--mut);font-size:12px}.kcarinfo b{font-size:clamp(20px,3.3vh,34px);font-weight:500;font-variant-numeric:tabular-nums}
+.kfuel{--c:#34d399;display:flex;align-items:center;gap:10px}.kfuel>i{font-size:22px;color:var(--c);filter:drop-shadow(0 0 6px var(--c))}.kfuel .kbar{flex:1}.kfuel b{min-width:52px;text-align:right;font-weight:500;font-variant-numeric:tabular-nums}.kfuel small{color:var(--mut);min-width:48px}
+.kfuel.low .kbar i{animation:pulse 1s infinite}
+.glint{animation:glint 8s ease-in-out infinite}@keyframes glint{0%{transform:translateX(-80px) skewX(-20deg)}55%,100%{transform:translateX(420px) skewX(-20deg)}}
+.hl{animation:hlp 3s ease-in-out infinite}@keyframes hlp{50%{opacity:.5}}
+.whl{animation:spin 7s linear infinite}
+.kcarimg{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+.kcarbox{position:relative;display:inline-block;max-width:100%}
+.kcarbox img{max-width:100%;max-height:19vh;display:block;filter:drop-shadow(0 12px 14px rgba(0,0,0,.5))}
+.kcarimg.plate img{background:#fff;border-radius:14px;filter:none}.kcams{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:10px}
+.kx{align-items:stretch}.kl,.kc2,.kr3{display:flex;flex-direction:column}
+.kl>.kcard:last-child,.kc2>.kcard:last-child,.kr3>.kcard:last-child{flex:1}
+.kc2>.kcard{display:flex;flex-direction:column}#k-chart{flex:1;display:flex;align-items:center}#k-chart svg{max-height:none}.kq{align-content:center}.kl>.kcard:last-child{align-content:center}
+.kcell{position:relative;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#000}
+.kcell img{width:100%;height:100%;object-fit:cover;display:block}
+.kcell::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.14) 0 2px,transparent 2px 4px),linear-gradient(180deg,rgba(0,0,0,.45),transparent 30%,transparent 70%,rgba(0,0,0,.65));pointer-events:none}
+.kcell .rec{position:absolute;top:8px;left:8px;z-index:2;font-size:10px;padding:3px 8px}.kcell b{position:absolute;left:10px;bottom:7px;z-index:2;font-size:13px;text-shadow:0 1px 6px #000}
+@property --p{syntax:'<percentage>';inherits:true;initial-value:50%}
+.kro{transition:background 1.4s,border-color 1.4s,--p 1.4s}
+.kro b{transition:color 1s}
+@media(max-width:1100px){.kx{grid-template-columns:1fr}}
+</style>`);
+document.body.insertAdjacentHTML('beforeend','<div id="ktitle"></div><div id="kbar"></div><div id="kexit" ondblclick="stopKiosk()"></div>');
+document.querySelector('.wrap').insertAdjacentHTML('beforeend','<div class="page" id="pg-kiosk"></div>');
+setInterval(()=>{if(kOn()){const h=new Date().getHours();document.body.classList.toggle('night',h>=23||h<6)}},60000);
+
+/* Wandmodus: bei geänderter Datei (z. B. nach git pull) automatisch neu laden – nur über http(s) */
+(()=>{let sig=null;const chk=async()=>{try{const r=await fetch(location.pathname,{cache:'no-store'});const s=(await r.text()).length+'|'+(r.headers.get('etag')||'');if(sig&&sig!==s&&kOn())location.reload();sig=sig||s}catch{}};chk();setInterval(chk,10*60*1000)})();
+
+/* ============ Start ============ */
+const INIT_KIOSK=location.hash==='#kiosk'||/[?&]kiosk/.test(location.search);
+showPage(INIT_KIOSK?'home':page);
+document.documentElement.style.setProperty('--accent',cfg.accent);
+if(!cfg.demo&&!cfg.token&&!location.protocol.startsWith('http')&&!cfg.tiles.length)startDemo();
+else if(!cfg.demo&&!cfg.token&&!(location.protocol.startsWith('http')&&location.pathname.includes('/local/'))){renderAll();setStatus('error','Nicht eingerichtet')}
+else connect();
+if(INIT_KIOSK)startKiosk();
+</script>
+</body>
+</html>
